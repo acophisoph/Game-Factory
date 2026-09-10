@@ -7,8 +7,15 @@
 set -euo pipefail
 
 GODOT_BIN="${GODOT_BIN:-/opt/godot/Godot_v4.3-stable_linux.x86_64}"
-PROJECT_DIR="$1"
+# Resolve to absolute paths: Godot resolves a relative --outdir against the
+# project root (res://), not the caller's cwd, so a relative PROJECT_DIR
+# here silently doubles up into <project>/<project>/verification_output.
+PROJECT_DIR="$(cd "$1" && pwd)"
 OUTDIR="${2:-${PROJECT_DIR}/verification_output}"
+case "${OUTDIR}" in
+	/*) ;;
+	*) OUTDIR="$(pwd)/${OUTDIR}" ;;
+esac
 DISPLAY_NUM=":99"
 
 if [ ! -x "${GODOT_BIN}" ]; then

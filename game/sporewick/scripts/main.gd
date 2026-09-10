@@ -3,15 +3,24 @@ extends Node2D
 # Sporewick core loop: plant -> grow -> harvest -> combine at the Wick ->
 # discover a hybrid species in the compendium.
 
-const GROW_SECONDS := 3.0
+const GROW_SECONDS := 60.0
+const VERIFY_GROW_SECONDS := 1.0
 const PLOT_COUNT := 4
 
 const BASE_SPORES := ["Ember Cap", "Moss Puff", "Glimmer Truffle"]
 
+# Cross-type combos discover a brand-new hybrid species. Same-type combos
+# (decided this run — see STATE.md known issues) discover a "refined" tier
+# of that same base spore instead of falling through to the Mystery Spore
+# fallback: this rewards focusing on one spore type as a deliberate
+# alternate strategy to cross-breeding variety, rather than punishing it.
 const RECIPES := {
 	"Ember Cap|Moss Puff": "Cindermoss Bloom",
 	"Ember Cap|Glimmer Truffle": "Suncap Ember",
 	"Glimmer Truffle|Moss Puff": "Duskmoss Lantern",
+	"Ember Cap|Ember Cap": "Radiant Ember Cap",
+	"Moss Puff|Moss Puff": "Plush Moss Puff",
+	"Glimmer Truffle|Glimmer Truffle": "Gilded Truffle",
 }
 
 enum PlotState { EMPTY, GROWING, READY }
@@ -30,16 +39,25 @@ var _wick_button: Button
 
 var autopilot_ok := true
 
+# Real gameplay uses GROW_SECONDS (a balanced-for-now idle timescale); the
+# headless autopilot substitutes VERIFY_GROW_SECONDS so verification runs
+# in seconds instead of minutes. Same growth code path either way.
+var _active_grow_seconds := GROW_SECONDS
+
 
 func _ready() -> void:
 	randomize()
+
+	var args := OS.get_cmdline_user_args()
+	if args.has("--verify"):
+		_active_grow_seconds = VERIFY_GROW_SECONDS
+
 	for i in range(PLOT_COUNT):
 		plots.append({"state": PlotState.EMPTY, "spore_type": "", "timer": 0.0})
 
 	_build_ui()
 	_refresh_ui()
 
-	var args := OS.get_cmdline_user_args()
 	if args.has("--verify"):
 		var outdir := "res://verification_output"
 		for a in args:
@@ -54,18 +72,18 @@ func _process(delta: float) -> void:
 	for plot in plots:
 		if plot.state == PlotState.GROWING:
 			plot.timer += delta
-			if plot.timer >= GROW_SECONDS:
+			if plot.timer >= _active_grow_seconds:
 				plot.state = PlotState.READY
 				changed = true
 	if changed:
 		_refresh_ui()
 
 
-func plant_at(i: int) -> bool:
+func plant_at(i: int, forced_type: String = "") -> bool:
 	if plots[i].state != PlotState.EMPTY:
 		return false
 	plots[i].state = PlotState.GROWING
-	plots[i].spore_type = BASE_SPORES[randi() % BASE_SPORES.size()]
+	plots[i].spore_type = forced_type if forced_type != "" else BASE_SPORES[randi() % BASE_SPORES.size()]
 	plots[i].timer = 0.0
 	_refresh_ui()
 	return true
@@ -186,7 +204,7 @@ func _refresh_ui() -> void:
 				btn.text = "Empty plot\n(tap to plant)"
 				btn.modulate = Color(0.55, 0.55, 0.55)
 			PlotState.GROWING:
-				var pct := int(100.0 * plot.timer / GROW_SECONDS)
+				var pct := int(100.0 * plot.timer / _active_grow_seconds)
 				btn.text = "%s\ngrowing %d%%" % [plot.spore_type, pct]
 				btn.modulate = Color(0.6, 0.75, 0.5)
 			PlotState.READY:
@@ -219,11 +237,11 @@ func _run_autopilot(outdir: String) -> void:
 	print("--- Sporewick headless autopilot start ---")
 	await _screenshot(outdir, "00_start")
 
-	_assert(plant_at(0), "plant plot 0")
-	_assert(plant_at(1), "plant plot 1")
+	_assert(plant_at(0, "Ember Cap"), "plant plot 0 (Ember Cap)")
+	_assert(plant_at(1, "Moss Puff"), "plant plot 1 (Moss Puff)")
 	await _screenshot(outdir, "01_planted")
 
-	await get_tree().create_timer(GROW_SECONDS + 0.5).timeout
+	await get_tree().create_timer(_active_grow_seconds + 0.5).timeout
 	_assert(plots[0].state == PlotState.READY, "plot 0 grew to ready")
 	_assert(plots[1].state == PlotState.READY, "plot 1 grew to ready")
 	await _screenshot(outdir, "02_grown")
@@ -234,10 +252,23 @@ func _run_autopilot(outdir: String) -> void:
 	await _screenshot(outdir, "03_harvested")
 
 	var before := compendium.size()
-	_assert(combine_at_wick(), "combine at wick")
+	_assert(combine_at_wick(), "combine cross-type pair at wick")
+	_assert(compendium.has("Cindermoss Bloom"), "cross-type combo discovered the expected hybrid")
 	_assert(compendium.size() == before + 1, "compendium gained a new species")
 	_assert(currency > 0, "currency increased over the loop")
 	await _screenshot(outdir, "04_combined")
+
+	# Exercise the same-type combo path (this run's design decision: it
+	# should discover a "refined" spore, never fall through to Mystery Spore).
+	_assert(plant_at(2, "Ember Cap"), "plant plot 2 (Ember Cap)")
+	_assert(plant_at(3, "Ember Cap"), "plant plot 3 (Ember Cap)")
+	await get_tree().create_timer(_active_grow_seconds + 0.5).timeout
+	_assert(harvest_at(2), "harvest plot 2")
+	_assert(harvest_at(3), "harvest plot 3")
+	_assert(combine_at_wick(), "combine same-type pair at wick")
+	_assert(compendium.has("Radiant Ember Cap"), "same-type combo discovered the refined spore")
+	_assert(not compendium.has("Mystery Spore"), "same-type combo did not fall through to Mystery Spore")
+	await _screenshot(outdir, "05_same_type_combined")
 
 	print("Final state: currency=%d compendium=%s inventory=%s" % [currency, JSON.stringify(compendium), inventory])
 	print("--- Sporewick headless autopilot ", ("PASS" if autopilot_ok else "FAIL"), " ---")
