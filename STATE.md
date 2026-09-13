@@ -27,7 +27,7 @@
 - [x] Name checked against known works (see NAME_CHECK.md) — "Sporewick" locked after 3 prior candidates collided
 - [x] Minimal playable vertical slice (core verbs wired end to end) — plant → grow → harvest → combine at Wick → compendium/currency update, all wired and verified headlessly (see Testing note below)
 - [x] Gameplay pass (feels functional, not just wired) — growth timing rebalanced (3s → 60s real, with a fast 1s override for the headless autopilot only), the same-type-combo design question resolved (see Known Issues), recipe table expanded from 3 to 6 recipes (all 6 possible pairs of the 3 base spores now covered — Mystery Spore fallback is unreachable with the current spore set but kept as a safety net for when more base spores are added). Plot count (4) left as-is — not a "feels bare" issue at this stage, revisit alongside monetization design (extra plots as IAP) later.
-- [ ] Design pass (UI/UX coherent) — current UI is default-theme Buttons/Labels only, no visual identity yet
+- [x] Design pass (UI/UX coherent) — replaced default-theme Buttons/Labels with a small cozy-fungal-garden palette (deep forest background, rounded StyleBoxFlat cards, distinct colors per plot state — muted empty, moss-green growing, warm amber ready — and a violet Wick button so the combine action reads as a distinct kind of interaction). No new assets: palette is applied entirely through code-generated `StyleBoxFlat`/color overrides, same license-free-by-construction approach as before.
 - [ ] Asset pass (see ASSET_LOG.md — every asset verified) — no real art/audio yet; only a placeholder icon and primitive-colored UI, both original
 - [ ] Testing pass (headless verification, save/load, perf) — save/load with offline-progress catch-up implemented and headlessly verified this run (see below); perf (frame time under real scene load) still not measured
 - [ ] Debugging pass (known-issues list empty or triaged) — see Known Issues below
@@ -114,18 +114,19 @@
   players have real saves (i.e., post-launch), not before.
 
 ## Pipeline checklist progress note
-Run #2 completed the Gameplay pass flagged by run #1. Run #3 picked up
-the more urgent of the two items run #2 flagged next (persistence, over
-the Design pass) since losing in-progress growth on app close was a
-real functional gap, not just a visual one — implemented autosave-on-
-action and offline-progress catch-up, headlessly verified with a
-save/reload round-trip and a back-dated-timestamp offline-catchup test
-(24/24 autopilot assertions passing). Per the "cap at 4 rounds" rule,
-this run's scope stayed to persistence; it did not start the Design
-pass, perf measurement, or RevenueCat integration. **Next run should do
-the Design pass** (UI is still default-theme Buttons/Labels, no visual
-identity — the most visible remaining gap) and/or a quick perf check
-now that persistence is done and Testing pass is nearly closed out.
+Run #2 completed the Gameplay pass flagged by run #1. Run #3 did
+persistence (autosave-on-action + offline-progress catch-up),
+headlessly verified with a save/reload round-trip and a back-dated-
+timestamp offline-catchup test (24/24 autopilot assertions passing).
+Later the same day, prompted by a live follow-up rather than the next
+scheduled run, the Design pass got done too: replaced the default-
+theme Buttons/Labels with a small cozy-fungal-garden palette (rounded
+StyleBoxFlat cards, distinct colors per plot state, a violet Wick
+button) — see changelog entry below. This was **not** a new numbered
+scheduled run (still 2026-09-13); the next *scheduled* run should treat
+the Design pass as done and move to whichever of perf measurement,
+RevenueCat integration, or the Asset pass (real, non-placeholder art)
+makes sense next, per its own read of this file.
 
 ## Note on branch/PR history (run #3)
 This run's designated branch (`claude/upbeat-ritchie-gxyo11`) had been
@@ -211,3 +212,22 @@ merge order will resolve cleanly, but a human should merge or close PR
   reload, confirming the catch-up logic actually ran, not just that the
   assertion string matched). No new assets or names introduced. Not
   shipped snippet Y/N: not shipped, see /SOCIAL_SNIPPETS/2026-09-13.md.
+- 2026-09-13 (same day, live follow-up — not a new scheduled run):
+  Design pass. Replaced the default-theme gray Buttons/Labels with a
+  small cozy-fungal-garden palette: deep forest-green background, a
+  rounded semi-opaque "card" (`PanelContainer` + `StyleBoxFlat`) for the
+  info readout, and per-plot-state colors — muted slate for empty,
+  moss green for growing, warm amber for ready — plus a distinct violet
+  style for the Wick button so combining reads as a different kind of
+  action from tending a plot. Implemented via a `_panel_style()` helper
+  building `StyleBoxFlat` resources (rounded corners, borders, content
+  margins) applied through `add_theme_stylebox_override`, replacing the
+  old flat `modulate` tinting. Also fixed a small pre-existing UX rough
+  edge found while touching this code: the Wick's "need 2 spores"
+  status message used to persist on screen indefinitely since nothing
+  ever cleared it; `_refresh_ui()` now clears it on every successful
+  action. No new assets or names (palette is code-generated colors, not
+  external files). Re-ran the full headless autopilot after the change
+  — still 24/24 assertions pass — and visually inspected several
+  screenshots to confirm the new styling actually renders as intended
+  (not just that the game logic still works).

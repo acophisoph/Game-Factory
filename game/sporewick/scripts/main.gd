@@ -28,6 +28,24 @@ const RECIPES := {
 	"Glimmer Truffle|Glimmer Truffle": "Gilded Truffle",
 }
 
+# --- Visual identity (Design pass, run #4) ---
+# A small cozy-fungal-garden palette: deep forest background, warm amber
+# for anything ready/interactive, moss green for growth in progress, and
+# a distinct violet for the Wick (it's a different kind of action from
+# planting/harvesting a plot, so it gets a different accent).
+const COLOR_BG := Color("1b2a23")
+const COLOR_PANEL := Color("24352c")
+const COLOR_TEXT := Color("eef2ea")
+const COLOR_TEXT_MUTED := Color("a9b8ac")
+const COLOR_EMPTY_BG := Color("2c3a33")
+const COLOR_EMPTY_BORDER := Color("46574d")
+const COLOR_GROWING_BG := Color("2f4536")
+const COLOR_GROWING_BORDER := Color("5f8f6b")
+const COLOR_READY_BG := Color("4a3a20")
+const COLOR_READY_BORDER := Color("f2b155")
+const COLOR_WICK_BG := Color("332a45")
+const COLOR_WICK_BORDER := Color("8a6fb0")
+
 enum PlotState { EMPTY, GROWING, READY }
 
 var plots := []
@@ -201,50 +219,101 @@ func _apply_offline_elapsed(elapsed: float) -> void:
 				plot.state = PlotState.READY
 
 
+# Builds a rounded, bordered StyleBoxFlat — used for both the plot
+# buttons (per growth state) and the top info card. Centralized here so
+# the palette is the only thing that changes between them.
+func _panel_style(bg: Color, border: Color, border_width: int = 2, radius: int = 14) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = bg
+	box.set_border_width_all(border_width)
+	box.border_color = border
+	box.set_corner_radius_all(radius)
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 10
+	box.content_margin_bottom = 10
+	return box
+
+
+func _style_plot_button(btn: Button, bg: Color, border: Color) -> void:
+	btn.add_theme_stylebox_override("normal", _panel_style(bg, border))
+	btn.add_theme_stylebox_override("hover", _panel_style(bg.lightened(0.08), border))
+	btn.add_theme_stylebox_override("pressed", _panel_style(bg.darkened(0.1), border))
+	btn.add_theme_stylebox_override("focus", _panel_style(bg, border))
+	btn.add_theme_color_override("font_color", COLOR_TEXT)
+	btn.add_theme_color_override("font_hover_color", COLOR_TEXT)
+	btn.add_theme_color_override("font_pressed_color", COLOR_TEXT)
+
+
 func _build_ui() -> void:
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
 
+	var background := ColorRect.new()
+	background.color = COLOR_BG
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	canvas.add_child(background)
+
 	var root := VBoxContainer.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_theme_constant_override("separation", 16)
+	root.add_theme_constant_override("separation", 20)
 	canvas.add_child(root)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 24)
 	margin.add_theme_constant_override("margin_right", 24)
-	margin.add_theme_constant_override("margin_top", 48)
+	margin.add_theme_constant_override("margin_top", 40)
 	root.add_child(margin)
 
+	var info_card := PanelContainer.new()
+	info_card.add_theme_stylebox_override("panel", _panel_style(COLOR_PANEL, COLOR_EMPTY_BORDER, 1, 18))
+	margin.add_child(info_card)
+
+	var info_margin := MarginContainer.new()
+	info_margin.add_theme_constant_override("margin_left", 18)
+	info_margin.add_theme_constant_override("margin_right", 18)
+	info_margin.add_theme_constant_override("margin_top", 14)
+	info_margin.add_theme_constant_override("margin_bottom", 14)
+	info_card.add_child(info_margin)
+
 	var top_box := VBoxContainer.new()
-	margin.add_child(top_box)
+	top_box.add_theme_constant_override("separation", 6)
+	info_margin.add_child(top_box)
 
 	var title := Label.new()
 	title.text = "Sporewick"
-	title.add_theme_font_size_override("font_size", 32)
+	title.add_theme_font_size_override("font_size", 34)
+	title.add_theme_color_override("font_color", COLOR_READY_BORDER)
 	top_box.add_child(title)
 
 	_currency_label = Label.new()
+	_currency_label.add_theme_color_override("font_color", COLOR_TEXT)
 	top_box.add_child(_currency_label)
 
 	_compendium_label = Label.new()
+	_compendium_label.add_theme_color_override("font_color", COLOR_TEXT)
 	top_box.add_child(_compendium_label)
 
 	_inventory_label = Label.new()
+	_inventory_label.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	top_box.add_child(_inventory_label)
 
 	_status_label = Label.new()
+	_status_label.add_theme_color_override("font_color", COLOR_READY_BORDER)
 	top_box.add_child(_status_label)
 
 	var plots_box := HBoxContainer.new()
 	plots_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	plots_box.add_theme_constant_override("separation", 12)
+	plots_box.add_theme_constant_override("separation", 14)
 	root.add_child(plots_box)
 
 	for i in range(PLOT_COUNT):
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(140, 140)
+		btn.clip_text = true
+		btn.autowrap_mode = TextServer.AUTOWRAP_WORD
 		btn.pressed.connect(_on_plot_pressed.bind(i))
+		_style_plot_button(btn, COLOR_EMPTY_BG, COLOR_EMPTY_BORDER)
 		plots_box.add_child(btn)
 		_plot_buttons.append(btn)
 
@@ -256,7 +325,9 @@ func _build_ui() -> void:
 	_wick_button = Button.new()
 	_wick_button.custom_minimum_size = Vector2(0, 90)
 	_wick_button.text = "Combine at the Wick"
+	_wick_button.add_theme_font_size_override("font_size", 20)
 	_wick_button.pressed.connect(_on_wick_pressed)
+	_style_plot_button(_wick_button, COLOR_WICK_BG, COLOR_WICK_BORDER)
 	wick_margin.add_child(_wick_button)
 
 
@@ -276,6 +347,7 @@ func _on_wick_pressed() -> void:
 
 
 func _refresh_ui() -> void:
+	_status_label.text = ""
 	_currency_label.text = "Currency: %d" % currency
 	_compendium_label.text = "Compendium: %d discovered" % compendium.size()
 	_inventory_label.text = "Inventory: %s" % (", ".join(inventory) if inventory.size() > 0 else "empty")
@@ -286,14 +358,14 @@ func _refresh_ui() -> void:
 		match plot.state:
 			PlotState.EMPTY:
 				btn.text = "Empty plot\n(tap to plant)"
-				btn.modulate = Color(0.55, 0.55, 0.55)
+				_style_plot_button(btn, COLOR_EMPTY_BG, COLOR_EMPTY_BORDER)
 			PlotState.GROWING:
 				var pct := int(100.0 * plot.timer / _active_grow_seconds)
 				btn.text = "%s\ngrowing %d%%" % [plot.spore_type, pct]
-				btn.modulate = Color(0.6, 0.75, 0.5)
+				_style_plot_button(btn, COLOR_GROWING_BG, COLOR_GROWING_BORDER)
 			PlotState.READY:
 				btn.text = "%s\nready! (tap to harvest)" % plot.spore_type
-				btn.modulate = Color(1.0, 0.85, 0.4)
+				_style_plot_button(btn, COLOR_READY_BG, COLOR_READY_BORDER)
 
 
 # --- Headless verification autopilot ---
