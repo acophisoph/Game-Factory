@@ -16,5 +16,7 @@ row for the new name rather than editing the old one.
 
 | Radiant Ember Cap / Plush Moss Puff / Gilded Truffle (same-type "refined" spore names, added run #2) | Judgment call, no individual search performed | Same reasoning as the earlier hybrid-name row: generic descriptive fantasy-flora names (adjective + existing base spore name), not distinctive enough to plausibly reference a specific real person, company, or media property. | Kept. Revisit individually only if one is later promoted to a more prominent role. |
 
+| Wick's Blessing (subscription IAP name) / Spore Pack (one-off IAP name) | Judgment call, no individual search performed | "Wick's Blessing" extends the game's own already-locked "the Wick" lore term (see Sporewick row above) with a generic noun; "Spore Pack" is a plain generic descriptor (item-type + "pack" is one of the most common IAP naming patterns in mobile idle games, e.g. countless "starter pack"/"resource pack" products) — neither is distinctive enough to plausibly reference a specific real person, company, or product. | Kept, same reasoning class as the existing spore-species row above. |
+
 ## Game title status
 **Current locked title: Sporewick**

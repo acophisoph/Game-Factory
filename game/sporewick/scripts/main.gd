@@ -58,7 +58,10 @@ var _currency_label: Label
 var _compendium_label: Label
 var _inventory_label: Label
 var _status_label: Label
+var _blessing_label: Label
 var _wick_button: Button
+var _spore_pack_button: Button
+var _blessing_button: Button
 
 var autopilot_ok := true
 
@@ -88,6 +91,14 @@ func _ready() -> void:
 	if not is_verify:
 		_load_game()
 
+	Purchases.purchase_result.connect(_on_purchase_result)
+	Purchases.customer_info_changed.connect(_on_customer_info_changed)
+	# Real API keys are a human-managed secret, not something this repo can
+	# generate or verify — see STATE.md "RevenueCat setup still needed".
+	# Empty string is a safe no-op in stub mode (the only mode this sandbox
+	# can run); swapping in a real key does not require any other code change.
+	Purchases.initialize("")
+
 	_build_ui()
 	_refresh_ui()
 
@@ -105,11 +116,21 @@ func _process(delta: float) -> void:
 	for plot in plots:
 		if plot.state == PlotState.GROWING:
 			plot.timer += delta
-			if plot.timer >= _active_grow_seconds:
+			if plot.timer >= _effective_grow_seconds():
 				plot.state = PlotState.READY
 				changed = true
 	if changed:
 		_refresh_ui()
+
+
+# Wick's Blessing (subscription IAP, see purchase_manager.gd) halves the
+# time a plot needs to grow. Read live off the entitlement rather than
+# cached, so growth speeds up/slows down immediately as the subscription
+# state changes (purchase, restore, expiry).
+func _effective_grow_seconds() -> float:
+	if Purchases.has_entitlement(Purchases.ENTITLEMENT_BLESSING):
+		return _active_grow_seconds / 2.0
+	return _active_grow_seconds
 
 
 func plant_at(i: int, forced_type: String = "") -> bool:
@@ -215,7 +236,7 @@ func _apply_offline_elapsed(elapsed: float) -> void:
 	for plot in plots:
 		if plot.state == PlotState.GROWING:
 			plot.timer += elapsed
-			if plot.timer >= _active_grow_seconds:
+			if plot.timer >= _effective_grow_seconds():
 				plot.state = PlotState.READY
 
 
@@ -302,6 +323,10 @@ func _build_ui() -> void:
 	_status_label.add_theme_color_override("font_color", COLOR_READY_BORDER)
 	top_box.add_child(_status_label)
 
+	_blessing_label = Label.new()
+	_blessing_label.add_theme_color_override("font_color", COLOR_WICK_BORDER)
+	top_box.add_child(_blessing_label)
+
 	var plots_box := HBoxContainer.new()
 	plots_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	plots_box.add_theme_constant_override("separation", 14)
@@ -330,6 +355,33 @@ func _build_ui() -> void:
 	_style_plot_button(_wick_button, COLOR_WICK_BG, COLOR_WICK_BORDER)
 	wick_margin.add_child(_wick_button)
 
+	# --- Shop (RevenueCat-backed IAPs, see purchase_manager.gd) ---
+	var shop_margin := MarginContainer.new()
+	shop_margin.add_theme_constant_override("margin_left", 24)
+	shop_margin.add_theme_constant_override("margin_right", 24)
+	shop_margin.add_theme_constant_override("margin_top", 8)
+	root.add_child(shop_margin)
+
+	var shop_box := HBoxContainer.new()
+	shop_box.add_theme_constant_override("separation", 14)
+	shop_margin.add_child(shop_box)
+
+	_spore_pack_button = Button.new()
+	_spore_pack_button.custom_minimum_size = Vector2(0, 70)
+	_spore_pack_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_spore_pack_button.text = "Spore Pack\n$1.99"
+	_spore_pack_button.pressed.connect(_on_spore_pack_pressed)
+	_style_plot_button(_spore_pack_button, COLOR_PANEL, COLOR_EMPTY_BORDER)
+	shop_box.add_child(_spore_pack_button)
+
+	_blessing_button = Button.new()
+	_blessing_button.custom_minimum_size = Vector2(0, 70)
+	_blessing_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_blessing_button.text = "Wick's Blessing\n$2.99/mo"
+	_blessing_button.pressed.connect(_on_blessing_pressed)
+	_style_plot_button(_blessing_button, COLOR_PANEL, COLOR_WICK_BORDER)
+	shop_box.add_child(_blessing_button)
+
 
 func _on_plot_pressed(i: int) -> void:
 	match plots[i].state:
@@ -346,11 +398,46 @@ func _on_wick_pressed() -> void:
 		_status_label.text = "Need 2 harvested spores to combine."
 
 
+func _on_spore_pack_pressed() -> void:
+	Purchases.purchase_package(Purchases.OFFERING_ID, Purchases.PACKAGE_SPORE_PACK)
+
+
+func _on_blessing_pressed() -> void:
+	Purchases.purchase_package(Purchases.OFFERING_ID, Purchases.PACKAGE_SUBSCRIPTION)
+
+
+# Handles the result of any IAP, real (native RevenueCat) or stubbed (see
+# purchase_manager.gd) — the game logic doesn't know or care which.
+func _on_purchase_result(package_id: String, success: bool, info: Dictionary) -> void:
+	if not success:
+		_status_label.text = "Purchase failed — please try again."
+		return
+	var message := ""
+	match package_id:
+		Purchases.PACKAGE_SPORE_PACK:
+			var granted: Array = info.get("granted_spores", [])
+			for spore_type in granted:
+				inventory.append(spore_type)
+			message = "Spore Pack: +%d spores!" % granted.size()
+			_save_game()
+		Purchases.PACKAGE_SUBSCRIPTION:
+			message = "Wick's Blessing active — growth doubled!"
+	# _refresh_ui() clears _status_label as part of its normal redraw, so
+	# the purchase message has to be applied after it, not before.
+	_refresh_ui()
+	_status_label.text = message
+
+
+func _on_customer_info_changed(_info: Dictionary) -> void:
+	_refresh_ui()
+
+
 func _refresh_ui() -> void:
 	_status_label.text = ""
 	_currency_label.text = "Currency: %d" % currency
 	_compendium_label.text = "Compendium: %d discovered" % compendium.size()
 	_inventory_label.text = "Inventory: %s" % (", ".join(inventory) if inventory.size() > 0 else "empty")
+	_blessing_label.text = "✨ Wick's Blessing active (2x growth)" if Purchases.has_entitlement(Purchases.ENTITLEMENT_BLESSING) else ""
 
 	for i in range(PLOT_COUNT):
 		var plot = plots[i]
@@ -360,7 +447,7 @@ func _refresh_ui() -> void:
 				btn.text = "Empty plot\n(tap to plant)"
 				_style_plot_button(btn, COLOR_EMPTY_BG, COLOR_EMPTY_BORDER)
 			PlotState.GROWING:
-				var pct := int(100.0 * plot.timer / _active_grow_seconds)
+				var pct := int(100.0 * plot.timer / _effective_grow_seconds())
 				btn.text = "%s\ngrowing %d%%" % [plot.spore_type, pct]
 				_style_plot_button(btn, COLOR_GROWING_BG, COLOR_GROWING_BORDER)
 			PlotState.READY:
@@ -466,5 +553,55 @@ func _run_autopilot(outdir: String) -> void:
 	_refresh_ui()
 	await _screenshot(outdir, "07_offline_catchup")
 
+	# --- RevenueCat purchase flow (stub mode — see purchase_manager.gd for
+	# why this sandbox can't exercise the real native plugin) ---
+	_assert(not Purchases.has_entitlement(Purchases.ENTITLEMENT_BLESSING), "no entitlement before any purchase")
+	var inventory_before_pack := inventory.size()
+	var pack_result := await _await_purchase_package(Purchases.PACKAGE_SPORE_PACK, ["Ember Cap", "Moss Puff", "Glimmer Truffle"])
+	_assert(pack_result, "spore pack purchase reported success")
+	_assert(inventory.size() == inventory_before_pack + 3, "spore pack granted exactly 3 spores to inventory")
+	await _screenshot(outdir, "08_spore_pack_purchased")
+
+	var blessing_result := await _await_purchase_package(Purchases.PACKAGE_SUBSCRIPTION)
+	_assert(blessing_result, "wick's blessing purchase reported success")
+	_assert(Purchases.has_entitlement(Purchases.ENTITLEMENT_BLESSING), "entitlement active after subscription purchase")
+
+	_assert(plant_at(1, "Glimmer Truffle"), "plant plot 1 to verify boosted growth")
+	await get_tree().create_timer(_effective_grow_seconds() + 0.5).timeout
+	_assert(plots[1].state == PlotState.READY, "plot grew to ready in half the normal time with the blessing active")
+	_assert(_effective_grow_seconds() == _active_grow_seconds / 2.0, "effective grow time is halved while the blessing is active")
+	await _screenshot(outdir, "09_boosted_growth")
+
+	# --- Perf sanity check ---
+	# Software-rendered llvmpipe frame times here are NOT representative of
+	# a real mobile device's — this only guards against something being
+	# badly broken (e.g. an infinite loop or a leaked-node slowdown), and
+	# gives a same-environment baseline number to compare future runs
+	# against. See STATE.md for the honest caveat.
+	await get_tree().process_frame
+	var frame_ms := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	print("Perf: TIME_PROCESS = %.2f ms/frame (software-rendered llvmpipe, not representative of a real device)" % frame_ms)
+	_assert(frame_ms < 500.0, "frame process time is sane (not hung/looping), even under slow software rendering")
+
 	print("Final state: currency=%d compendium=%s inventory=%s" % [currency, JSON.stringify(compendium), inventory])
 	print("--- Sporewick headless autopilot ", ("PASS" if autopilot_ok else "FAIL"), " ---")
+
+
+# Purchases.purchase_result is async-shaped (a signal) to match the real
+# native plugin's API even though the stub resolves it deferred rather than
+# over a real network round-trip. The listener is connected *before*
+# purchase_package() is called so this can't miss an emission that fires
+# before an `await` on the signal itself would start listening.
+func _await_purchase_package(package_id: String, forced_spore_types: Array = []) -> bool:
+	var outcome := {"done": false, "success": false}
+	var handler: Callable
+	handler = func(acked_id: String, success: bool, _info: Dictionary):
+		if acked_id == package_id:
+			outcome.done = true
+			outcome.success = success
+	Purchases.purchase_result.connect(handler)
+	Purchases.purchase_package(Purchases.OFFERING_ID, package_id, forced_spore_types)
+	while not outcome.done:
+		await get_tree().process_frame
+	Purchases.purchase_result.disconnect(handler)
+	return outcome.success
