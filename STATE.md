@@ -18,9 +18,13 @@
 - Engine: **Godot 4** (4.3-stable). Using the routine's stated default;
   nothing about this game's mechanics needs a different engine.
 - Repo: this repo, `game/sporewick/` subfolder.
-- Last worked: 2026-09-17 (run #4 — RevenueCat purchase-manager scaffolding + perf sanity check)
-- Days remaining in submission window: **13 days** (from 2026-09-17 to
-  2026-09-30 11:45pm PDT)
+- Last worked: 2026-09-20 (run #5 — real Asset pass: spore icon set, app icon redesign, store screenshot)
+- Days remaining in submission window: **10 days** (from 2026-09-20 to
+  2026-09-30 11:45pm PDT). **This is now a hard constraint, not a status
+  line** — see the "Timeline risk" note below. Store publishing, RevenueCat
+  account/key setup, and on-device testing all require a human and have
+  not started; none of that can happen in the remaining 10 days without
+  that human action starting now.
 
 ## Pipeline checklist for current game
 - [x] Idea locked (one-paragraph pitch, genre, core loop) — see above
@@ -28,11 +32,11 @@
 - [x] Minimal playable vertical slice (core verbs wired end to end) — plant → grow → harvest → combine at Wick → compendium/currency update, all wired and verified headlessly (see Testing note below)
 - [x] Gameplay pass (feels functional, not just wired) — growth timing rebalanced (3s → 60s real, with a fast 1s override for the headless autopilot only), the same-type-combo design question resolved (see Known Issues), recipe table expanded from 3 to 6 recipes (all 6 possible pairs of the 3 base spores now covered — Mystery Spore fallback is unreachable with the current spore set but kept as a safety net for when more base spores are added). Plot count (4) left as-is — not a "feels bare" issue at this stage, revisit alongside monetization design (extra plots as IAP) later.
 - [x] Design pass (UI/UX coherent) — replaced default-theme Buttons/Labels with a small cozy-fungal-garden palette (deep forest background, rounded StyleBoxFlat cards, distinct colors per plot state — muted empty, moss-green growing, warm amber ready — and a violet Wick button so the combine action reads as a distinct kind of interaction). No new assets: palette is applied entirely through code-generated `StyleBoxFlat`/color overrides, same license-free-by-construction approach as before.
-- [ ] Asset pass (see ASSET_LOG.md — every asset verified) — no real art/audio yet; only a placeholder icon and primitive-colored UI, both original
+- [x] Asset pass (see ASSET_LOG.md — every asset verified) — run #5: replaced text-only plot buttons with a real 10-icon spore art set (all 3 base + 3 hybrid + 3 refined species, plus the Mystery Spore fallback), redesigned the app icon to match, and produced a real 1024x1024 store icon and a real 1179x2556 store screenshot. No music/SFX yet (still logged as pending in ASSET_LOG.md) and no background/environment art — the screenshot honestly shows a mostly-empty lower two-thirds of the screen, flagged below rather than hidden.
 - [x] Testing pass (headless verification, save/load, perf) — save/load with offline-progress catch-up (run #3) plus a perf sanity check (run #4, see below) are all headlessly verified now. Marking this checked with one honest caveat: the perf number is a software-rendered llvmpipe number in a Linux container, not a real mobile device measurement (see Known Issues) — there's no on-device perf data yet, only a "not obviously broken" sanity floor.
 - [ ] Debugging pass (known-issues list empty or triaged) — see Known Issues below
 - [~] RevenueCat SDK integrated, at least one real IAP wired — code-side integration done this run (a `PurchaseManager` autoload wrapping the documented `godot-x/revenuecat` API, wired into two real gameplay effects — see below), but **not a real, on-device-tested IAP**: the native plugin only runs on iOS/Android exports, which this sandbox cannot produce or test. See "RevenueCat: what's real vs. what needs a human" below before treating this as done.
-- [ ] Store listing assets ready (1024x1024 icon, 1179x2556 screenshot, no device frame) — not started
+- [~] Store listing assets ready (1024x1024 icon, 1179x2556 screenshot, no device frame) — icon and a real gameplay screenshot exist now (`game/sporewick/store_listing/`), both produced headlessly by real rendered output, not mockups. Marked partial, not done: one screenshot is unlikely to be enough for an actual store listing (most stores want several), and the screenshot's visual density is thin (see Known Issues) — good enough to unblock the pipeline, not necessarily "ready to submit."
 - [ ] Demo video (<2 min, shows real gameplay, no third-party trademarks/music) — not started
 - [ ] Published live on App Store / Google Play / Samsung Galaxy Store — not started
 - [ ] Devpost submission drafted — not started
@@ -149,7 +153,60 @@ verification (see above), not mocked out.
    transaction — flagging this explicitly rather than claiming the
    checklist item is fully done.
 
+## Timeline risk (run #5 — flagging loudly, not burying this)
+**10 days remain** in the Shipaton submission window as of this run
+(2026-09-20 → 2026-09-30 11:45pm PDT). Everything left on the checklist
+below the Asset pass — RevenueCat real API keys/store product setup,
+on-device IAP testing, an actual mobile export, store listing submission,
+and app review time on top of that — requires a human with a developer
+account, real payment/tax setup, and physical or emulated device access
+that this sandbox does not have and cannot get. None of that has started
+yet (see "RevenueCat: what's real vs. what needs a human" below, still
+accurate as of this run). App Store / Google Play review alone can take
+anywhere from hours to several days. **If a human doesn't start the
+account/store-setup work in the next few days, the remaining runway may
+not be enough to actually publish before the deadline**, independent of
+how much more in-sandbox polish happens. This isn't a reason to stop
+making progress here — it's a reason a human should look at this now
+rather than at the next scheduled run.
+
+## Note on branch/PR history (run #5)
+Same recurring situation runs #3 and #4 hit and handled: this run's
+designated branch (`claude/upbeat-ritchie-ducsz8`) was created from the
+same point as run #1, before runs #2–#4's work was merged into
+`claude/upbeat-ritchie-2qm97h` (there is still no `main` branch in this
+repo — `2qm97h` is the closest thing to one, and it has never had any of
+runs #1–#4's work merged into it either; all of it lives only in draft
+PRs). Fast-forward-merged run #4's branch (`b33g2a`, PR #3) into this
+run's branch before starting any new work. **This run's new PR
+supersedes PR #3** (strict superset, plus this run's Asset pass) — closing
+PR #3 with a pointer to the new one, same pattern as runs #3 and #4. A
+human should pick one of these PRs' branches to actually merge into a
+real base branch at some point — right now four runs of work exist only
+as a chain of draft PRs that close each other out, which works for this
+routine's own continuity but is not itself a "shipped" or even
+"integrated" state.
+
 ## Known issues (debugging log — triaged, non-blocking for now)
+- The new store screenshot (`game/sporewick/store_listing/store_screenshot_1179x2556.png`,
+  run #5) is real rendered gameplay at the correct resolution with no
+  device frame, but the UI only occupies roughly the top third of a
+  1179x2556 canvas — the rest is empty background color. Technically
+  satisfies the checklist item; not a compelling marketing screenshot yet.
+  A future Design/Asset pass should either add background/environment art
+  behind the UI or redesign the layout to use the vertical space (e.g. a
+  taller garden grid) before treating store assets as truly final.
+- Fixed a real latent bug this run, not specific to the new assets: Godot's
+  imported-texture binary cache (`.godot/imported/`) is gitignored as
+  non-portable, but nothing was regenerating it before a headless run. Any
+  texture asset loaded via `load()`/`preload()` (like the new spore icons)
+  would silently fail with "No loader found" / "Make sure resources have
+  been imported" on a fresh checkout, even though the gameplay-logic
+  autopilot assertions would still all pass — a real rendering regression
+  that the existing test suite could not have caught. Fixed by adding a
+  `--headless --import` pre-step to both `tools/run_headless_verify.sh`
+  and the new `tools/capture_store_screenshot.sh`; verified by wiping
+  `.godot/` and re-running both from a simulated fresh-clone state.
 - ~~Combining two harvested spores of the *same* base type falls back to
   "Mystery Spore".~~ **Resolved run #2**: same-type combos now discover a
   dedicated "refined" spore (Radiant Ember Cap / Plush Moss Puff / Gilded
@@ -198,20 +255,26 @@ Later the same day, prompted by a live follow-up rather than the next
 scheduled run, the Design pass got done too: replaced the default-
 theme Buttons/Labels with a small cozy-fungal-garden palette (rounded
 StyleBoxFlat cards, distinct colors per plot state, a violet Wick
-button) — see changelog entry below. Run #4 (this run) picked up the
-next-run note's three options — perf measurement, RevenueCat
-integration, or the Asset pass — and did the first two: a perf sanity
-check, and RevenueCat purchase-manager scaffolding wired into two real
-gameplay effects (spore pack, growth-boost subscription). Real
-store/API-key setup and on-device testing are explicitly flagged as
-human follow-ups (see "RevenueCat: what's real vs. what needs a human"
-above) — this was a deliberate scope call given the routine's own
-"cap each piece at 4 rounds" rule and the fact that a genuine RevenueCat
-purchase requires an app store account and a real device, neither of
-which this sandbox has. The **next scheduled run** should either start
-the real (non-placeholder) Asset pass, or — if a human has done the
-RevenueCat dashboard/store setup in the meantime — pick up on-device
-testing and check off that pipeline item for real.
+button) — see changelog entry below. Run #4 picked up the next-run
+note's three options — perf measurement, RevenueCat integration, or
+the Asset pass — and did the first two: a perf sanity check, and
+RevenueCat purchase-manager scaffolding wired into two real gameplay
+effects (spore pack, growth-boost subscription). Real store/API-key
+setup and on-device testing are explicitly flagged as human follow-ups
+(see "RevenueCat: what's real vs. what needs a human" above). Run #5
+(this run) did the real Asset pass flagged as the remaining option: a
+10-icon hand-authored spore art set, a redesigned app icon in the same
+visual language, and real store-listing deliverables (1024x1024 icon,
+1179x2556 gameplay screenshot). Also found and fixed a real latent bug
+in the shared headless tooling (imported-texture cache gitignored but
+never regenerated — see Known Issues) that would have silently broken
+every future run's art the same way it broke this one on first try. The
+**next scheduled run** should pick up the Debugging pass (the known-
+issues list is getting long enough to warrant a dedicated triage pass)
+and/or check whether a human has done any of the RevenueCat/store-setup
+work flagged as urgent above — given only 10 days remain, that human
+follow-up is now the critical path, not the next in-sandbox pipeline
+stage.
 
 ## Note on branch/PR history (run #4)
 Same situation run #3 flagged and handled for run #2's work: this run's
@@ -365,3 +428,40 @@ can be reopened/recovered from.
   purchase testing remain human follow-ups this sandbox cannot do
   itself — not marking the RevenueCat checklist item as fully done.
   Snippet: see /SOCIAL_SNIPPETS/2026-09-17.md.
+- 2026-09-20: Run #5 (real Asset pass). No new SOCIAL_FEEDBACK.md entries
+  to incorporate (still empty). Found this run's designated branch again
+  predated the latest progress (same recurring situation as runs #3–#4) —
+  fast-forward-merged run #4's branch (`b33g2a`, PR #3) in first; see
+  "Note on branch/PR history" above. Baseline-verified the merged state
+  (35/35 assertions) before changing anything. Did the Asset pass flagged
+  as the next run's option: built `tools/gen_spore_icons.py`, a
+  hand-authored SVG mushroom-icon generator (cap/stem/spot template,
+  parameterized colors), producing all 10 spore species icons (3 base, 3
+  hybrid, 3 refined, 1 Mystery Spore fallback) as original art, logged in
+  ASSET_LOG.md. Wired them into `main.gd`'s plot buttons (icon + status
+  text stacked via a click-through VBoxContainer, replacing the old
+  text-only buttons). Redesigned the app icon to match
+  (`tools/gen_app_icon.py`) and rendered store-listing deliverables: a
+  real 1024x1024 icon and a real 1179x2556 no-device-frame gameplay
+  screenshot (new `tools/capture_store_screenshot.sh`, which drives the
+  real game-logic functions into a representative mid-game state and
+  captures actual rendered output, same principle as the verification
+  autopilot). Hit a real bug wiring this up: the new icon textures failed
+  to load with "No loader found" the first time verification ran after
+  wiping the sandbox, because Godot's imported-texture binary cache
+  (`.godot/imported/`, gitignored as non-portable) doesn't exist on a
+  fresh checkout and nothing was regenerating it — the gameplay-logic
+  assertions all still passed, which would have silently hidden a real
+  rendering regression from every future run using this asset pattern.
+  Fixed by adding a `--headless --import` pre-step to both
+  `run_headless_verify.sh` and the new `capture_store_screenshot.sh`;
+  verified the fix by wiping `.godot/` and re-running both end to end
+  (35/35 assertions, icons rendering correctly in inspected screenshots).
+  Logged the honest caveat that the new store screenshot's lower
+  two-thirds is still empty background (no environment art yet) rather
+  than overstating the Asset pass as fully "store ready." Given the
+  submission window is down to 10 days as of this run, added an explicit
+  "Timeline risk" section above flagging that RevenueCat/store setup and
+  on-device testing are now the critical path and need human action
+  starting now, not just at the next scheduled run. Snippet: see
+  /SOCIAL_SNIPPETS/2026-09-20.md.

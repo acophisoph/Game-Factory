@@ -24,5 +24,11 @@ if ! command -v Xvfb >/dev/null 2>&1; then
 	apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 >/dev/null
 fi
 
+if ! command -v rsvg-convert >/dev/null 2>&1; then
+	echo "Installing librsvg2-bin (SVG rasterization for asset generation)..."
+	apt-get update -qq
+	apt-get install -y -qq librsvg2-bin >/dev/null
+fi
+
 echo "Godot ready: ${GODOT_BIN}"
 echo "export GODOT_BIN=${GODOT_BIN}"

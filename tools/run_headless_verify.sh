@@ -23,6 +23,17 @@ if [ ! -x "${GODOT_BIN}" ]; then
 	exit 1
 fi
 
+# .godot/imported/ (the actual imported binary cache resources like PNGs
+# resolve to at runtime) is gitignored as non-portable, so it never exists
+# on a fresh checkout — only the small companion `*.import` files are
+# committed. Without this, any `load()`/`preload()` of a texture asset
+# fails with "No loader found" / "Make sure resources have been imported by
+# opening the project in the editor at least once", even though the
+# gameplay-logic assertions below would still pass, silently hiding a real
+# rendering regression. Re-importing is idempotent and cheap, so it's not
+# gated behind a flag — every verify run does it.
+"${GODOT_BIN}" --headless --path "${PROJECT_DIR}" --import >/dev/null 2>&1 || true
+
 Xvfb "${DISPLAY_NUM}" -screen 0 1280x800x24 &
 XVFB_PID=$!
 trap 'kill "${XVFB_PID}" 2>/dev/null || true' EXIT
