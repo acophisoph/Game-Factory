@@ -18,13 +18,14 @@
 - Engine: **Godot 4** (4.3-stable). Using the routine's stated default;
   nothing about this game's mechanics needs a different engine.
 - Repo: this repo, `game/sporewick/` subfolder.
-- Last worked: 2026-09-20 (run #5 — real Asset pass: spore icon set, app icon redesign, store screenshot)
-- Days remaining in submission window: **10 days** (from 2026-09-20 to
+- Last worked: 2026-09-24 (run #6 — branch consolidation, Debugging pass
+  triage, Devpost + demo-video drafts)
+- Days remaining in submission window: **6 days** (from 2026-09-24 to
   2026-09-30 11:45pm PDT). **This is now a hard constraint, not a status
-  line** — see the "Timeline risk" note below. Store publishing, RevenueCat
-  account/key setup, and on-device testing all require a human and have
-  not started; none of that can happen in the remaining 10 days without
-  that human action starting now.
+  line** — see the "Timeline risk" note below, updated this run and still
+  unresolved: store publishing, RevenueCat account/key setup, and
+  on-device testing all require a human and have not started as of this
+  run, despite being flagged at runs #4 and #5 too.
 
 ## Pipeline checklist for current game
 - [x] Idea locked (one-paragraph pitch, genre, core loop) — see above
@@ -34,12 +35,31 @@
 - [x] Design pass (UI/UX coherent) — replaced default-theme Buttons/Labels with a small cozy-fungal-garden palette (deep forest background, rounded StyleBoxFlat cards, distinct colors per plot state — muted empty, moss-green growing, warm amber ready — and a violet Wick button so the combine action reads as a distinct kind of interaction). No new assets: palette is applied entirely through code-generated `StyleBoxFlat`/color overrides, same license-free-by-construction approach as before.
 - [x] Asset pass (see ASSET_LOG.md — every asset verified) — run #5: replaced text-only plot buttons with a real 10-icon spore art set (all 3 base + 3 hybrid + 3 refined species, plus the Mystery Spore fallback), redesigned the app icon to match, and produced a real 1024x1024 store icon and a real 1179x2556 store screenshot. No music/SFX yet (still logged as pending in ASSET_LOG.md) and no background/environment art — the screenshot honestly shows a mostly-empty lower two-thirds of the screen, flagged below rather than hidden.
 - [x] Testing pass (headless verification, save/load, perf) — save/load with offline-progress catch-up (run #3) plus a perf sanity check (run #4, see below) are all headlessly verified now. Marking this checked with one honest caveat: the perf number is a software-rendered llvmpipe number in a Linux container, not a real mobile device measurement (see Known Issues) — there's no on-device perf data yet, only a "not obviously broken" sanity floor.
-- [ ] Debugging pass (known-issues list empty or triaged) — see Known Issues below
+- [x] Debugging pass (known-issues list empty or triaged) — reviewed the
+  full Known Issues list this run (run #6): every open item is logged
+  with a clear resolution path and none blocks further progress per the
+  routine's own bar ("a stage isn't done, it's triaged if issues are
+  logged and non-blocking"). The two that matter most (RevenueCat real
+  purchase-failure paths, no on-device perf data) both reduce to the
+  same root cause — this sandbox cannot produce or run a real mobile
+  build — not to unaddressed bugs.
 - [~] RevenueCat SDK integrated, at least one real IAP wired — code-side integration done this run (a `PurchaseManager` autoload wrapping the documented `godot-x/revenuecat` API, wired into two real gameplay effects — see below), but **not a real, on-device-tested IAP**: the native plugin only runs on iOS/Android exports, which this sandbox cannot produce or test. See "RevenueCat: what's real vs. what needs a human" below before treating this as done.
 - [~] Store listing assets ready (1024x1024 icon, 1179x2556 screenshot, no device frame) — icon and a real gameplay screenshot exist now (`game/sporewick/store_listing/`), both produced headlessly by real rendered output, not mockups. Marked partial, not done: one screenshot is unlikely to be enough for an actual store listing (most stores want several), and the screenshot's visual density is thin (see Known Issues) — good enough to unblock the pipeline, not necessarily "ready to submit."
-- [ ] Demo video (<2 min, shows real gameplay, no third-party trademarks/music) — not started
-- [ ] Published live on App Store / Google Play / Samsung Galaxy Store — not started
-- [ ] Devpost submission drafted — not started
+- [~] Demo video (<2 min, shows real gameplay, no third-party trademarks/music) —
+  not recorded, but a full shot list is ready at `/DEMO_VIDEO_SHOTLIST.md`
+  (run #6), mapped to real verified gameplay moments with reference
+  screenshots for each beat. Recording itself needs a human (device/
+  simulator capture).
+- [ ] Published live on App Store / Google Play / Samsung Galaxy Store —
+  not started. **This step requires a human:** an enrolled Apple
+  Developer / Google Play Console / Samsung Seller account, signing
+  certificates or a keystore, and manual store-listing submission are
+  all outside what this coding session can do on its own. Flagged at
+  runs #4, #5, and again now (run #6) with no action yet.
+- [~] Devpost submission drafted — full draft ready at
+  `/DEVPOST_DRAFT.md` (run #6), every section written except the ones
+  that need Emily's own voice or account-gated info (Inspiration,
+  What's next, team info, and the live links once they exist).
 
 ## Headless verification tool (built this run, reusable across all future games)
 - `tools/setup_env.sh` — provisions the sandbox: downloads Godot 4.3-stable
@@ -153,22 +173,26 @@ verification (see above), not mocked out.
    transaction — flagging this explicitly rather than claiming the
    checklist item is fully done.
 
-## Timeline risk (run #5 — flagging loudly, not burying this)
-**10 days remain** in the Shipaton submission window as of this run
-(2026-09-20 → 2026-09-30 11:45pm PDT). Everything left on the checklist
-below the Asset pass — RevenueCat real API keys/store product setup,
-on-device IAP testing, an actual mobile export, store listing submission,
-and app review time on top of that — requires a human with a developer
-account, real payment/tax setup, and physical or emulated device access
-that this sandbox does not have and cannot get. None of that has started
-yet (see "RevenueCat: what's real vs. what needs a human" below, still
-accurate as of this run). App Store / Google Play review alone can take
-anywhere from hours to several days. **If a human doesn't start the
-account/store-setup work in the next few days, the remaining runway may
-not be enough to actually publish before the deadline**, independent of
-how much more in-sandbox polish happens. This isn't a reason to stop
-making progress here — it's a reason a human should look at this now
-rather than at the next scheduled run.
+## Timeline risk (run #6 — updated, still unresolved, flagging loudly)
+**Only 6 days remain** in the Shipaton submission window as of this run
+(2026-09-24 → 2026-09-30 11:45pm PDT), down from the 10 days flagged at
+run #5 four days ago. Everything left on the checklist below the Asset
+pass — RevenueCat real API keys/store product setup, on-device IAP
+testing, an actual mobile export, store listing submission, and app
+review time on top of that — requires a human with a developer account,
+real payment/tax setup, and physical or emulated device access that this
+sandbox does not have and cannot get. **None of that has started yet,
+as of this run** (see "RevenueCat: what's real vs. what needs a human"
+below, still accurate). This is the third consecutive run to flag this
+(runs #4, #5, and now #6) with no visible human action taken in between.
+App Store / Google Play review alone can take anywhere from hours to
+several days — at 6 days remaining, that review time alone could
+consume the entire remaining window if account/store setup hasn't even
+started. **This is very likely no longer "start soon," it's "start
+today or the deadline probably isn't reachable."** In-sandbox work this
+run (Debugging pass, Devpost draft, demo-video shot list) closes out
+everything that *can* be done without a human — what remains is, at this
+point, entirely human-gated.
 
 ## Note on branch/PR history (run #5)
 Same recurring situation runs #3 and #4 hit and handled: this run's
@@ -262,19 +286,24 @@ RevenueCat purchase-manager scaffolding wired into two real gameplay
 effects (spore pack, growth-boost subscription). Real store/API-key
 setup and on-device testing are explicitly flagged as human follow-ups
 (see "RevenueCat: what's real vs. what needs a human" above). Run #5
-(this run) did the real Asset pass flagged as the remaining option: a
+did the real Asset pass flagged as the remaining option: a
 10-icon hand-authored spore art set, a redesigned app icon in the same
 visual language, and real store-listing deliverables (1024x1024 icon,
 1179x2556 gameplay screenshot). Also found and fixed a real latent bug
 in the shared headless tooling (imported-texture cache gitignored but
 never regenerated — see Known Issues) that would have silently broken
-every future run's art the same way it broke this one on first try. The
-**next scheduled run** should pick up the Debugging pass (the known-
-issues list is getting long enough to warrant a dedicated triage pass)
-and/or check whether a human has done any of the RevenueCat/store-setup
-work flagged as urgent above — given only 10 days remain, that human
-follow-up is now the critical path, not the next in-sandbox pipeline
-stage.
+every future run's art the same way it broke this one on first try.
+Run #6 (this run) did the Debugging pass (triaged, see checklist above)
+and closed out everything else that doesn't need a human: a full Devpost
+draft (`/DEVPOST_DRAFT.md`) and a demo-video shot list
+(`/DEMO_VIDEO_SHOTLIST.md`) mapped to real, already-verified gameplay
+moments. **With only 6 days left, there is no more meaningful in-sandbox
+pipeline work to hand to the next scheduled run** — everything that
+remains (RevenueCat account/keys, store product setup, on-device
+testing, an actual mobile export, store submission, recording the demo
+video) needs a human. The next scheduled run's most useful job may be
+checking whether that human work has started and updating this file
+accordingly, not generating more code.
 
 ## Note on branch/PR history (run #4)
 Same situation run #3 flagged and handled for run #2's work: this run's
@@ -294,6 +323,45 @@ with a comment pointing at the new PR rather than leaving three
 overlapping open PRs for a human to untangle. If that turns out to be
 unwanted, the closed PRs' branches (`3ivydg`, `gxyo11`) still exist and
 can be reopened/recovered from.
+
+## Note on branch/PR history (run #6)
+Same situation for a fourth consecutive time. This run's designated
+branch (`claude/upbeat-ritchie-1bz9n8`) was, once again, created from
+run #1's commit — before I discovered this, I'd already redone run #2's
+exact gameplay pass from scratch (growth timing, same-type combo,
+persistence, and even independently found and fixed the identical
+`run_headless_verify.sh` path bug run #2 already fixed) as a new commit
+and pushed a PR (#5) for it. Caught this by checking for existing open
+PRs before assuming the repo state was accurate, found PR #4 (run #5's
+branch, `ducsz8`) already contained everything through the real Asset
+pass — discarded my own duplicate commit via `git reset --hard` onto
+`ducsz8` rather than trying to merge two independent reimplementations
+of the same feature, then re-verified the adopted state (35/35
+assertions) before adding this run's actual new work on top. **PR #5 is
+being updated in place to be a strict superset of PR #4**, and PR #4 is
+being closed with a pointer here, continuing the pattern runs #3–#5
+established.
+
+**This is now the fourth run in a row to hit this**, and run #5 already
+said explicitly "a human should pick one of these PRs' branches to
+actually merge into a real base branch at some point" — that still
+hadn't happened as of this run, four days and one run later. Two
+distinct problems, both worth a human decision rather than a fifth
+run rediscovering the same thing:
+1. **No real base branch exists.** `claude/upbeat-ritchie-2qm97h` (run
+   #1's branch) is the closest thing to one and has never had any later
+   run's work merged into it. Every run's actual progress lives only in
+   a chain of draft PRs that supersede each other.
+2. **Each scheduled run gets a brand-new, randomly-named branch** to
+   develop on (per this run's own task instructions), rather than
+   continuing the same branch or building from whatever the previous
+   run left as the latest state. The fast-forward-and-close pattern
+   runs #3–#6 have used is a workable stopgap — it does preserve all
+   the work — but it costs a run's worth of budget rediscovering and
+   re-verifying state that a merged base branch or a stable
+   continuation branch would make unnecessary. Merging PR #5 (or
+   whichever PR is latest at the time) into a real default branch would
+   fix this going forward.
 
 ## Backlog (next games, if current one finishes or gets shelved)
 1. (none yet — this is the first game; backlog will fill in as ideas come up or if Sporewick gets shelved per the 3-stalled-runs rule)
@@ -465,3 +533,36 @@ can be reopened/recovered from.
   on-device testing are now the critical path and need human action
   starting now, not just at the next scheduled run. Snippet: see
   /SOCIAL_SNIPPETS/2026-09-20.md.
+- 2026-09-24: Run #6 (branch consolidation, Debugging pass, Devpost +
+  demo-video drafts). No new SOCIAL_FEEDBACK.md entries to incorporate
+  (still empty). Started by redoing run #2's gameplay pass from scratch
+  (growth timing, same-type combo, persistence, even independently
+  hitting and fixing the identical `run_headless_verify.sh` path bug run
+  #2 already fixed) before checking for existing open PRs and discovering
+  PR #4 (run #5's branch, `ducsz8`) already contained all of that plus
+  everything through the real Asset pass. Discarded the duplicate work
+  (`git reset --hard` onto `ducsz8`) rather than trying to reconcile two
+  independent implementations of the same features, re-verified the
+  adopted state (35/35 assertions, confirmed from a simulated fresh
+  checkout) before doing anything new — see "Note on branch/PR history
+  (run #6)" above for the full account and the two structural problems
+  (no real base branch; a fresh random branch per scheduled run) behind
+  why this keeps happening. Actual new work this run: (1) reviewed the
+  full Known Issues list and marked the Debugging pass checklist item
+  done — every open item is logged with a resolution path and none is
+  blocking, per the routine's own bar; (2) wrote a complete Devpost
+  submission draft (`/DEVPOST_DRAFT.md`) with every section filled in
+  except the ones that need Emily's own voice or account-gated info; (3)
+  wrote a demo-video shot list (`/DEMO_VIDEO_SHOTLIST.md`) mapping a
+  ~90-second video to real, already-verified gameplay moments with
+  reference screenshots for each beat, plus a note on avoiding
+  third-party music/trademarks. Updated the Timeline risk section: only
+  **6 days** remain (down from 10 four days ago), and this is the third
+  consecutive run to flag that RevenueCat account/key setup, store
+  product setup, on-device testing, and store submission are entirely
+  human-gated with no visible action taken yet — flagging this run that
+  app review time alone could now consume the entire remaining window if
+  that work hasn't already started. Snippet: see
+  /SOCIAL_SNIPPETS/2026-09-24.md (rewritten this run to reflect what
+  actually happened, replacing an earlier draft written before the
+  duplicate-work discovery).
