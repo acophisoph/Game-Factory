@@ -18,24 +18,48 @@
 - Engine: **Godot 4** (4.3-stable). Using the routine's stated default;
   nothing about this game's mechanics needs a different engine.
 - Repo: this repo, `game/sporewick/` subfolder.
-- Last worked: 2026-09-06 (run #1 — project inception)
-- Days remaining in submission window: **24 days** (from 2026-09-06 to
-  2026-09-30 11:45pm PDT)
+- Last worked: 2026-09-24 (run #6 — branch consolidation, Debugging pass
+  triage, Devpost + demo-video drafts)
+- Days remaining in submission window: **6 days** (from 2026-09-24 to
+  2026-09-30 11:45pm PDT). **This is now a hard constraint, not a status
+  line** — see the "Timeline risk" note below, updated this run and still
+  unresolved: store publishing, RevenueCat account/key setup, and
+  on-device testing all require a human and have not started as of this
+  run, despite being flagged at runs #4 and #5 too.
 
 ## Pipeline checklist for current game
 - [x] Idea locked (one-paragraph pitch, genre, core loop) — see above
 - [x] Name checked against known works (see NAME_CHECK.md) — "Sporewick" locked after 3 prior candidates collided
 - [x] Minimal playable vertical slice (core verbs wired end to end) — plant → grow → harvest → combine at Wick → compendium/currency update, all wired and verified headlessly (see Testing note below)
-- [ ] Gameplay pass (feels functional, not just wired) — currently functional but bare; growth timing (3s), plot count (4), and recipe table (3 recipes) are all placeholder-tuned, not balanced
-- [ ] Design pass (UI/UX coherent) — current UI is default-theme Buttons/Labels only, no visual identity yet
-- [ ] Asset pass (see ASSET_LOG.md — every asset verified) — no real art/audio yet; only a placeholder icon and primitive-colored UI, both original
-- [ ] Testing pass (headless verification, save/load, perf) — headless verification tool built and passing (see below); save/load and perf not yet addressed (nothing persists between runs yet)
-- [ ] Debugging pass (known-issues list empty or triaged) — see Known Issues below
-- [ ] RevenueCat SDK integrated, at least one real IAP wired — not started
-- [ ] Store listing assets ready (1024x1024 icon, 1179x2556 screenshot, no device frame) — not started
-- [ ] Demo video (<2 min, shows real gameplay, no third-party trademarks/music) — not started
-- [ ] Published live on App Store / Google Play / Samsung Galaxy Store — not started
-- [ ] Devpost submission drafted — not started
+- [x] Gameplay pass (feels functional, not just wired) — growth timing rebalanced (3s → 60s real, with a fast 1s override for the headless autopilot only), the same-type-combo design question resolved (see Known Issues), recipe table expanded from 3 to 6 recipes (all 6 possible pairs of the 3 base spores now covered — Mystery Spore fallback is unreachable with the current spore set but kept as a safety net for when more base spores are added). Plot count (4) left as-is — not a "feels bare" issue at this stage, revisit alongside monetization design (extra plots as IAP) later.
+- [x] Design pass (UI/UX coherent) — replaced default-theme Buttons/Labels with a small cozy-fungal-garden palette (deep forest background, rounded StyleBoxFlat cards, distinct colors per plot state — muted empty, moss-green growing, warm amber ready — and a violet Wick button so the combine action reads as a distinct kind of interaction). No new assets: palette is applied entirely through code-generated `StyleBoxFlat`/color overrides, same license-free-by-construction approach as before.
+- [x] Asset pass (see ASSET_LOG.md — every asset verified) — run #5: replaced text-only plot buttons with a real 10-icon spore art set (all 3 base + 3 hybrid + 3 refined species, plus the Mystery Spore fallback), redesigned the app icon to match, and produced a real 1024x1024 store icon and a real 1179x2556 store screenshot. No music/SFX yet (still logged as pending in ASSET_LOG.md) and no background/environment art — the screenshot honestly shows a mostly-empty lower two-thirds of the screen, flagged below rather than hidden.
+- [x] Testing pass (headless verification, save/load, perf) — save/load with offline-progress catch-up (run #3) plus a perf sanity check (run #4, see below) are all headlessly verified now. Marking this checked with one honest caveat: the perf number is a software-rendered llvmpipe number in a Linux container, not a real mobile device measurement (see Known Issues) — there's no on-device perf data yet, only a "not obviously broken" sanity floor.
+- [x] Debugging pass (known-issues list empty or triaged) — reviewed the
+  full Known Issues list this run (run #6): every open item is logged
+  with a clear resolution path and none blocks further progress per the
+  routine's own bar ("a stage isn't done, it's triaged if issues are
+  logged and non-blocking"). The two that matter most (RevenueCat real
+  purchase-failure paths, no on-device perf data) both reduce to the
+  same root cause — this sandbox cannot produce or run a real mobile
+  build — not to unaddressed bugs.
+- [~] RevenueCat SDK integrated, at least one real IAP wired — code-side integration done this run (a `PurchaseManager` autoload wrapping the documented `godot-x/revenuecat` API, wired into two real gameplay effects — see below), but **not a real, on-device-tested IAP**: the native plugin only runs on iOS/Android exports, which this sandbox cannot produce or test. See "RevenueCat: what's real vs. what needs a human" below before treating this as done.
+- [~] Store listing assets ready (1024x1024 icon, 1179x2556 screenshot, no device frame) — icon and a real gameplay screenshot exist now (`game/sporewick/store_listing/`), both produced headlessly by real rendered output, not mockups. Marked partial, not done: one screenshot is unlikely to be enough for an actual store listing (most stores want several), and the screenshot's visual density is thin (see Known Issues) — good enough to unblock the pipeline, not necessarily "ready to submit."
+- [~] Demo video (<2 min, shows real gameplay, no third-party trademarks/music) —
+  not recorded, but a full shot list is ready at `/DEMO_VIDEO_SHOTLIST.md`
+  (run #6), mapped to real verified gameplay moments with reference
+  screenshots for each beat. Recording itself needs a human (device/
+  simulator capture).
+- [ ] Published live on App Store / Google Play / Samsung Galaxy Store —
+  not started. **This step requires a human:** an enrolled Apple
+  Developer / Google Play Console / Samsung Seller account, signing
+  certificates or a keystore, and manual store-listing submission are
+  all outside what this coding session can do on its own. Flagged at
+  runs #4, #5, and again now (run #6) with no action yet.
+- [~] Devpost submission drafted — full draft ready at
+  `/DEVPOST_DRAFT.md` (run #6), every section written except the ones
+  that need Emily's own voice or account-gated info (Inspiration,
+  What's next, team info, and the live links once they exist).
 
 ## Headless verification tool (built this run, reusable across all future games)
 - `tools/setup_env.sh` — provisions the sandbox: downloads Godot 4.3-stable
@@ -60,30 +84,284 @@
   growth → harvest both → combine at the Wick → assert the compendium
   grew and currency increased. All 9 assertions pass. Screenshots saved
   to `game/sporewick/verification_output/*.png` (committed as evidence).
+- Run #2 also fixed a latent bug in `tools/run_headless_verify.sh`: when
+  called with a *relative* project path, Godot resolves a relative
+  `--outdir` against the project root (`res://`), not the caller's cwd,
+  silently nesting output into `<project>/<project>/verification_output`
+  instead of `<project>/verification_output`. The script now resolves
+  both the project dir and outdir to absolute paths before invoking
+  Godot, fixed for all future games that reuse this tool.
+- Run #2's autopilot (`_run_autopilot`) was extended: it now plants
+  deterministic spore types (via a new optional `forced_type` param on
+  `plant_at`, real game logic path, not a mock — only the RNG pick is
+  bypassed for reproducible testing) to exercise both a cross-type
+  combo (asserts the exact expected hybrid) and the new same-type combo
+  path (asserts it reaches the refined spore, never "Mystery Spore").
+  17 assertions, all passing. New screenshot:
+  `05_same_type_combined.png`.
+- Run #3 added persistence: every state-changing action (`plant_at`,
+  `harvest_at`, `combine_at_wick`) now autosaves full game state
+  (currency, inventory, compendium, per-plot state/spore/timer, plus a
+  `saved_at` unix timestamp) to `user://savegame.json` as JSON —
+  autosave-on-action rather than a timer or an on-quit hook, since a
+  mobile OS can kill a backgrounded app without a clean exit. On launch,
+  `_load_game()` restores state and calls `_apply_offline_elapsed()`,
+  which advances any still-growing plot's timer by the real elapsed time
+  since the last save — so a plot that would have finished growing while
+  the app was closed is caught up to ready on the next launch instead of
+  silently losing that progress. The headless autopilot uses an isolated
+  `user://verify_savegame.json` path (deleted at the start of every
+  verify run) so verification never reads or clobbers a real save.
+- Run #4 extended the autopilot with a perf sanity check: samples
+  `Performance.TIME_PROCESS` after the full loop has run and asserts it's
+  under 500ms/frame — a "not hung or looping" floor, not a real perf
+  target (see Known Issues: the number itself, ~92ms/frame under
+  software-rendered llvmpipe in this container, isn't representative of a
+  real device). Also extended it to drive the new RevenueCat purchase
+  flow (see below) end to end in stub mode: buy the spore pack, assert
+  inventory grew by exactly 3; buy the subscription, assert the
+  entitlement flips on and a newly-planted plot reaches ready in half the
+  normal grow time. 35/35 assertions pass, two new screenshots
+  (`08_spore_pack_purchased.png`, `09_boosted_growth.png`) confirm both
+  the shop UI and the "✨ Wick's Blessing active" indicator actually
+  render, not just that the assertions matched.
+
+## RevenueCat: what's real vs. what needs a human (run #4)
+Added `game/sporewick/scripts/purchase_manager.gd`, an autoload singleton
+(`Purchases`) wrapping the community `godot-x/revenuecat` plugin's
+documented public API (MIT license — see ASSET_LOG.md). It exposes
+`initialize()`, `fetch_offerings()`, `purchase_package()`,
+`has_entitlement()`, `restore_purchases()`, and the signals
+`offerings_ready`/`purchase_result`/`customer_info_changed`, matching the
+real plugin's names exactly. Wired into two real gameplay effects,
+matching the pitch's original monetization design:
+- **Spore Pack** (one-off, `$1.99`): grants 3 spores directly to
+  inventory, no growing required.
+- **Wick's Blessing** (subscription, `$2.99/mo`): while the entitlement
+  is active, all plot growth takes half as long (`_effective_grow_seconds()`
+  in `main.gd`), shown in the UI with a "✨ Wick's Blessing active (2x
+  growth)" label.
+
+**What's real:** the game-logic side — entitlement gating, the currency/
+inventory effects of each purchase, the shop UI, the signal-based async
+API shape. All of it is exercised by the real code path in headless
+verification (see above), not mocked out.
+
+**What is NOT real, and needs a human, before this can ship:**
+1. The actual `godot-x/revenuecat` native plugin (iOS `.xcframework` +
+   Android `.aar`) is **not installed in this repo**. It only runs on
+   iOS/Android exports — this sandbox can only build/run desktop Linux,
+   so it has no way to install, load, or test those binaries. Install it
+   from the Godot Asset Library or https://github.com/godot-x/revenuecat
+   Releases before an actual mobile export.
+2. A real RevenueCat project + API keys (`appl_...` / `goog_...`) —
+   `Purchases.initialize("")` currently runs with an empty placeholder key
+   that's a safe no-op in stub mode. This needs a human to create the
+   RevenueCat project and supply real keys (a secret, not something to
+   invent or store in this repo).
+3. Matching product IDs configured in App Store Connect / Google Play
+   Console: `wicks_blessing_monthly` (subscription) and
+   `spore_pack_small` (consumable) — the code assumes these IDs exist in
+   an offering named `default`; nothing will actually be purchasable
+   until a human sets those up on both sides (RevenueCat dashboard +
+   store consoles) to match.
+4. Real on-device purchase testing (sandbox/test-flight purchase or a
+   promo code) — the routine's own Testing-pass bar ("RevenueCat IAP flow
+   actually unlockable with a test purchase or promo code") can only be
+   met on a real device once 1–3 above are done. Stub-mode verification
+   in this sandbox exercises the game-logic side only, not a real store
+   transaction — flagging this explicitly rather than claiming the
+   checklist item is fully done.
+
+## Timeline risk (run #6 — updated, still unresolved, flagging loudly)
+**Only 6 days remain** in the Shipaton submission window as of this run
+(2026-09-24 → 2026-09-30 11:45pm PDT), down from the 10 days flagged at
+run #5 four days ago. Everything left on the checklist below the Asset
+pass — RevenueCat real API keys/store product setup, on-device IAP
+testing, an actual mobile export, store listing submission, and app
+review time on top of that — requires a human with a developer account,
+real payment/tax setup, and physical or emulated device access that this
+sandbox does not have and cannot get. **None of that has started yet,
+as of this run** (see "RevenueCat: what's real vs. what needs a human"
+below, still accurate). This is the third consecutive run to flag this
+(runs #4, #5, and now #6) with no visible human action taken in between.
+App Store / Google Play review alone can take anywhere from hours to
+several days — at 6 days remaining, that review time alone could
+consume the entire remaining window if account/store setup hasn't even
+started. **This is very likely no longer "start soon," it's "start
+today or the deadline probably isn't reachable."** In-sandbox work this
+run (Debugging pass, Devpost draft, demo-video shot list) closes out
+everything that *can* be done without a human — what remains is, at this
+point, entirely human-gated.
+
+## Note on branch/PR history (run #5)
+Same recurring situation runs #3 and #4 hit and handled: this run's
+designated branch (`claude/upbeat-ritchie-ducsz8`) was created from the
+same point as run #1, before runs #2–#4's work was merged into
+`claude/upbeat-ritchie-2qm97h` (there is still no `main` branch in this
+repo — `2qm97h` is the closest thing to one, and it has never had any of
+runs #1–#4's work merged into it either; all of it lives only in draft
+PRs). Fast-forward-merged run #4's branch (`b33g2a`, PR #3) into this
+run's branch before starting any new work. **This run's new PR
+supersedes PR #3** (strict superset, plus this run's Asset pass) — closing
+PR #3 with a pointer to the new one, same pattern as runs #3 and #4. A
+human should pick one of these PRs' branches to actually merge into a
+real base branch at some point — right now four runs of work exist only
+as a chain of draft PRs that close each other out, which works for this
+routine's own continuity but is not itself a "shipped" or even
+"integrated" state.
 
 ## Known issues (debugging log — triaged, non-blocking for now)
-- Combining two harvested spores of the *same* base type isn't in the
-  recipe table, so it silently falls back to a generic "Mystery Spore"
-  result. This might be fine as an intentional design choice (rewards
-  harvesting *different* spore types together), but it hasn't been
-  decided on purpose yet — flagging for the Gameplay pass rather than
-  fixing blind.
-- Growth timer (3 seconds) is a prototyping-speed placeholder, not a
-  real idle-game timescale. Needs a real balance pass (likely minutes-to-
-  hours with offline-progress catch-up) before this reads as an "idle
-  game" rather than a fast arcade loop.
-- No persistence yet (nothing saved between sessions) — needed before
-  the Testing pass can be considered complete.
-- No RevenueCat integration yet — needed before Testing pass.
+- The new store screenshot (`game/sporewick/store_listing/store_screenshot_1179x2556.png`,
+  run #5) is real rendered gameplay at the correct resolution with no
+  device frame, but the UI only occupies roughly the top third of a
+  1179x2556 canvas — the rest is empty background color. Technically
+  satisfies the checklist item; not a compelling marketing screenshot yet.
+  A future Design/Asset pass should either add background/environment art
+  behind the UI or redesign the layout to use the vertical space (e.g. a
+  taller garden grid) before treating store assets as truly final.
+- Fixed a real latent bug this run, not specific to the new assets: Godot's
+  imported-texture binary cache (`.godot/imported/`) is gitignored as
+  non-portable, but nothing was regenerating it before a headless run. Any
+  texture asset loaded via `load()`/`preload()` (like the new spore icons)
+  would silently fail with "No loader found" / "Make sure resources have
+  been imported" on a fresh checkout, even though the gameplay-logic
+  autopilot assertions would still all pass — a real rendering regression
+  that the existing test suite could not have caught. Fixed by adding a
+  `--headless --import` pre-step to both `tools/run_headless_verify.sh`
+  and the new `tools/capture_store_screenshot.sh`; verified by wiping
+  `.godot/` and re-running both from a simulated fresh-clone state.
+- ~~Combining two harvested spores of the *same* base type falls back to
+  "Mystery Spore".~~ **Resolved run #2**: same-type combos now discover a
+  dedicated "refined" spore (Radiant Ember Cap / Plush Moss Puff / Gilded
+  Truffle) instead — a deliberate reward for focusing on one spore type,
+  as an alternate strategy to cross-breeding variety, not a fallback.
+- ~~Growth timer (3 seconds) is a prototyping-speed placeholder.~~
+  **Partially addressed run #2**: real gameplay timing is now 60 seconds
+  (a first balance pass). Offline-progress catch-up was the remaining
+  piece and is **resolved run #3** — see below.
+- ~~No persistence yet (nothing saved between sessions).~~ **Resolved
+  run #3**: autosave-on-action to `user://savegame.json`, restored and
+  offline-caught-up on launch. See the persistence note above.
+- ~~Perf (target frame time under real scene load) still not measured.~~
+  **Partially addressed run #4**: headless autopilot now samples
+  `Performance.TIME_PROCESS` (~92ms/frame under this container's
+  software-rendered llvmpipe) and asserts it's sane. Caveat: this is a
+  software-rendering number in a Linux container, not a real mobile
+  device measurement — there's no evidence yet that a real phone/tablet
+  runs this comfortably at 60fps, only that nothing here is pathologically
+  broken. Real on-device perf testing still needs a human with real
+  hardware (or at minimum a mobile emulator this sandbox doesn't have).
+- ~~No RevenueCat integration yet.~~ **Code-side integration done run
+  #4** (see "RevenueCat: what's real vs. what needs a human" above) —
+  but real store/API-key setup and on-device purchase testing are human
+  follow-ups this sandbox cannot do itself. Do not treat the checklist
+  item as fully done until those happen.
+- RevenueCat purchase failure paths (declined payment, cancelled sheet,
+  network error) are untested — the stub always "succeeds," since there's
+  no real store to reject a purchase in this sandbox. `_on_purchase_result`
+  in `main.gd` does have a failure branch (shows "Purchase failed —
+  please try again."), but it's only been exercised by an
+  unknown-package-id stub case, not a real store decline. Flag for
+  on-device testing alongside item 4 above.
+- Save data has no version field and no corruption handling: a malformed
+  or future-schema save file would currently fail `_load_game()`'s type
+  check and silently start fresh (safe, but silent). Fine for a solo
+  prototype; flag for revisit once the save schema needs to change after
+  players have real saves (i.e., post-launch), not before.
 
 ## Pipeline checklist progress note
-Per the routine's own "cap each piece at 4 rounds" rule: this run spent
-its budget on inception (idea, name-check, engine verification, headless
-tooling, vertical slice) rather than polish, which is the correct order
-per Section 2 ("build ONE minimal playable vertical slice first"). Next
-run should do a Gameplay pass: tune growth timing, expand the recipe
-table, and decide the same-type-combo question above — not jump ahead to
-art or RevenueCat yet.
+Run #2 completed the Gameplay pass flagged by run #1. Run #3 did
+persistence (autosave-on-action + offline-progress catch-up),
+headlessly verified with a save/reload round-trip and a back-dated-
+timestamp offline-catchup test (24/24 autopilot assertions passing).
+Later the same day, prompted by a live follow-up rather than the next
+scheduled run, the Design pass got done too: replaced the default-
+theme Buttons/Labels with a small cozy-fungal-garden palette (rounded
+StyleBoxFlat cards, distinct colors per plot state, a violet Wick
+button) — see changelog entry below. Run #4 picked up the next-run
+note's three options — perf measurement, RevenueCat integration, or
+the Asset pass — and did the first two: a perf sanity check, and
+RevenueCat purchase-manager scaffolding wired into two real gameplay
+effects (spore pack, growth-boost subscription). Real store/API-key
+setup and on-device testing are explicitly flagged as human follow-ups
+(see "RevenueCat: what's real vs. what needs a human" above). Run #5
+did the real Asset pass flagged as the remaining option: a
+10-icon hand-authored spore art set, a redesigned app icon in the same
+visual language, and real store-listing deliverables (1024x1024 icon,
+1179x2556 gameplay screenshot). Also found and fixed a real latent bug
+in the shared headless tooling (imported-texture cache gitignored but
+never regenerated — see Known Issues) that would have silently broken
+every future run's art the same way it broke this one on first try.
+Run #6 (this run) did the Debugging pass (triaged, see checklist above)
+and closed out everything else that doesn't need a human: a full Devpost
+draft (`/DEVPOST_DRAFT.md`) and a demo-video shot list
+(`/DEMO_VIDEO_SHOTLIST.md`) mapped to real, already-verified gameplay
+moments. **With only 6 days left, there is no more meaningful in-sandbox
+pipeline work to hand to the next scheduled run** — everything that
+remains (RevenueCat account/keys, store product setup, on-device
+testing, an actual mobile export, store submission, recording the demo
+video) needs a human. The next scheduled run's most useful job may be
+checking whether that human work has started and updating this file
+accordingly, not generating more code.
+
+## Note on branch/PR history (run #4)
+Same situation run #3 flagged and handled for run #2's work: this run's
+designated branch (`claude/upbeat-ritchie-b33g2a`) was created from the
+same point as run #1 (before run #2 or run #3's work was merged into the
+default branch, `claude/upbeat-ritchie-2qm97h`). Two PRs were already
+open and unmerged at the start of this run — **PR #1** (run #2's
+gameplay pass, branch `3ivydg`) and **PR #2** (run #3's persistence work
+plus the same-day Design pass, branch `gxyo11`, which itself already
+contained PR #1's commit). Fast-forward-merged `gxyo11` into this run's
+branch before starting any new work, so this run builds on the actual
+latest progress instead of redoing it — same approach run #3 used.
+
+**This run's new PR will make PR #1 and PR #2 fully redundant** (it's a
+strict superset of both, plus this run's own work), so I'm closing both
+with a comment pointing at the new PR rather than leaving three
+overlapping open PRs for a human to untangle. If that turns out to be
+unwanted, the closed PRs' branches (`3ivydg`, `gxyo11`) still exist and
+can be reopened/recovered from.
+
+## Note on branch/PR history (run #6)
+Same situation for a fourth consecutive time. This run's designated
+branch (`claude/upbeat-ritchie-1bz9n8`) was, once again, created from
+run #1's commit — before I discovered this, I'd already redone run #2's
+exact gameplay pass from scratch (growth timing, same-type combo,
+persistence, and even independently found and fixed the identical
+`run_headless_verify.sh` path bug run #2 already fixed) as a new commit
+and pushed a PR (#5) for it. Caught this by checking for existing open
+PRs before assuming the repo state was accurate, found PR #4 (run #5's
+branch, `ducsz8`) already contained everything through the real Asset
+pass — discarded my own duplicate commit via `git reset --hard` onto
+`ducsz8` rather than trying to merge two independent reimplementations
+of the same feature, then re-verified the adopted state (35/35
+assertions) before adding this run's actual new work on top. **PR #5 is
+being updated in place to be a strict superset of PR #4**, and PR #4 is
+being closed with a pointer here, continuing the pattern runs #3–#5
+established.
+
+**This is now the fourth run in a row to hit this**, and run #5 already
+said explicitly "a human should pick one of these PRs' branches to
+actually merge into a real base branch at some point" — that still
+hadn't happened as of this run, four days and one run later. Two
+distinct problems, both worth a human decision rather than a fifth
+run rediscovering the same thing:
+1. **No real base branch exists.** `claude/upbeat-ritchie-2qm97h` (run
+   #1's branch) is the closest thing to one and has never had any later
+   run's work merged into it. Every run's actual progress lives only in
+   a chain of draft PRs that supersede each other.
+2. **Each scheduled run gets a brand-new, randomly-named branch** to
+   develop on (per this run's own task instructions), rather than
+   continuing the same branch or building from whatever the previous
+   run left as the latest state. The fast-forward-and-close pattern
+   runs #3–#6 have used is a workable stopgap — it does preserve all
+   the work — but it costs a run's worth of budget rediscovering and
+   re-verifying state that a merged base branch or a stable
+   continuation branch would make unnecessary. Merging PR #5 (or
+   whichever PR is latest at the time) into a real default branch would
+   fix this going forward.
 
 ## Backlog (next games, if current one finishes or gets shelved)
 1. (none yet — this is the first game; backlog will fill in as ideas come up or if Sporewick gets shelved per the 3-stalled-runs rule)
@@ -108,3 +386,183 @@ art or RevenueCat yet.
   harvest → combine → compendium), all 9 autopilot assertions passing
   with real rendered screenshots as evidence. Not shipped snippet Y/N:
   first-ever snippet, see /SOCIAL_SNIPPETS/2026-09-06.md.
+- 2026-09-10: Run #2 (gameplay pass). No new SOCIAL_FEEDBACK.md entries
+  to incorporate (nothing posted publicly yet). Did the Gameplay pass
+  flagged by run #1: rebalanced growth timer from a 3s prototyping
+  placeholder to 60s real gameplay time (with a separate 1s override
+  used only by the headless autopilot, so verification stays fast without
+  changing real game feel); expanded the recipe table from 3 to 6
+  recipes by deciding the same-type-combo design question — same-type
+  pairs now discover a "refined" spore (Radiant Ember Cap / Plush Moss
+  Puff / Gilded Truffle) instead of falling through to Mystery Spore,
+  rewarding a focus-on-one-type strategy as a deliberate alternative to
+  cross-breeding variety. Logged the 3 new spore names in NAME_CHECK.md
+  (same low-collision-risk reasoning as the earlier hybrid names).
+  Extended the headless autopilot to exercise both the cross-type and
+  same-type combo paths deterministically (added an optional
+  `forced_type` arg to `plant_at` so the autopilot can control which
+  spore lands in a plot while still exercising the real game logic, not
+  a mock) — 17/17 assertions pass, verified with real rendered
+  screenshots including a new `05_same_type_combined.png`. While
+  re-running verification, found and fixed a real bug in the shared
+  `tools/run_headless_verify.sh`: a relative project-dir argument caused
+  Godot to resolve the output path against the project root instead of
+  the caller's cwd, silently nesting screenshots into
+  `<project>/<project>/verification_output`; script now resolves both
+  paths to absolute before invoking Godot, fixed for all future games
+  reusing this tool. Not shipped snippet Y/N: not shipped, see
+  /SOCIAL_SNIPPETS/2026-09-10.md.
+- 2026-09-13: Run #3 (persistence + offline-progress catch-up). No new
+  SOCIAL_FEEDBACK.md entries to incorporate (still empty). Found that
+  this run's designated branch predated run #2's merge (PR #1 was still
+  open) — fast-forward-merged that branch's commit in first so this run
+  builds on run #2's actual state rather than redoing it; flagged PR #1
+  for human cleanup, see note above. Implemented save/load: every
+  state-changing action now autosaves full game state (currency,
+  inventory, compendium, per-plot state/spore/timer, `saved_at` unix
+  timestamp) to `user://savegame.json` as JSON; `_load_game()` on launch
+  restores it and applies offline-progress catch-up (`_apply_offline_
+  elapsed`), advancing any still-growing plot by the real time elapsed
+  since the last save so growth completed while the app was closed isn't
+  lost. Headless autopilot uses an isolated, always-cleared
+  `user://verify_savegame.json` so verification can't touch a real save.
+  Extended the autopilot with a save/reload round-trip check (wipe
+  in-memory state, reload, assert currency/compendium/inventory match)
+  and an offline-catchup check (plant, back-date the save file's
+  `saved_at` past a full growth cycle, reload, assert the plot reached
+  ready) — 24/24 assertions pass, verified with real rendered
+  screenshots (`06_reloaded.png`, `07_offline_catchup.png`; the latter
+  visibly shows "Moss Puff ready!" immediately after the simulated
+  reload, confirming the catch-up logic actually ran, not just that the
+  assertion string matched). No new assets or names introduced. Not
+  shipped snippet Y/N: not shipped, see /SOCIAL_SNIPPETS/2026-09-13.md.
+- 2026-09-13 (same day, live follow-up — not a new scheduled run):
+  Design pass. Replaced the default-theme gray Buttons/Labels with a
+  small cozy-fungal-garden palette: deep forest-green background, a
+  rounded semi-opaque "card" (`PanelContainer` + `StyleBoxFlat`) for the
+  info readout, and per-plot-state colors — muted slate for empty,
+  moss green for growing, warm amber for ready — plus a distinct violet
+  style for the Wick button so combining reads as a different kind of
+  action from tending a plot. Implemented via a `_panel_style()` helper
+  building `StyleBoxFlat` resources (rounded corners, borders, content
+  margins) applied through `add_theme_stylebox_override`, replacing the
+  old flat `modulate` tinting. Also fixed a small pre-existing UX rough
+  edge found while touching this code: the Wick's "need 2 spores"
+  status message used to persist on screen indefinitely since nothing
+  ever cleared it; `_refresh_ui()` now clears it on every successful
+  action. No new assets or names (palette is code-generated colors, not
+  external files). Re-ran the full headless autopilot after the change
+  — still 24/24 assertions pass — and visually inspected several
+  screenshots to confirm the new styling actually renders as intended
+  (not just that the game logic still works).
+- 2026-09-17: Run #4 (perf sanity check + RevenueCat purchase-manager
+  scaffolding). No new SOCIAL_FEEDBACK.md entries to incorporate (still
+  empty). Found two open, unmerged PRs at the start of this run (#1 —
+  run #2's gameplay pass; #2 — run #3's persistence work + design pass,
+  which already contained #1's commit) — fast-forward-merged PR #2's
+  branch (`gxyo11`) into this run's branch first, same approach run #3
+  used, so this run continues from the actual latest progress rather
+  than redoing it. Baseline-verified the merged state (24/24 assertions
+  pass) before making changes. Then: (1) added a perf sanity check to
+  the headless autopilot — samples `Performance.TIME_PROCESS`, asserts
+  it's sane (not hung/looping); logs ~92ms/frame under this container's
+  software-rendered llvmpipe, explicitly caveated in STATE.md as not
+  representative of real mobile hardware. (2) Added RevenueCat
+  integration: `game/sporewick/scripts/purchase_manager.gd`, an autoload
+  singleton wrapping the documented public API of the MIT-licensed
+  `godot-x/revenuecat` community plugin (logged in ASSET_LOG.md) behind
+  a stub that resolves purchases locally, since that plugin's native
+  binaries only run on iOS/Android exports and can't be loaded or tested
+  in this Linux sandbox. Wired into two real gameplay effects matching
+  the game's original monetization pitch: a one-off "Spore Pack" ($1.99,
+  grants 3 spores to inventory) and a "Wick's Blessing" subscription
+  ($2.99/mo, halves plot growth time while active, shown with a "✨
+  Wick's Blessing active" UI indicator). Logged both names in
+  NAME_CHECK.md. Extended the headless autopilot to buy both products
+  through the real purchase_package() code path and assert their real
+  gameplay effects (inventory +3; a newly-planted plot reaching ready in
+  half the normal time) — 35/35 assertions pass, two new screenshots
+  (`08_spore_pack_purchased.png`, `09_boosted_growth.png`) confirm the
+  shop UI and blessing indicator actually render. Hit and fixed a real
+  bug while wiring the autopilot's purchase-await helper: GDScript does
+  not support unpacking multiple signal-emitted values via comma-
+  separated assignment outside a `var` declaration (`a, b, c = await
+  sig`) — that's a parse error, not valid syntax; fixed by connecting a
+  one-shot listener before calling `purchase_package()` and polling a
+  flag across frames instead, which is also more robust against emission
+  timing than relying on `await` registering before a signal fires.
+  Documented explicitly in STATE.md (see "RevenueCat: what's real vs.
+  what needs a human") that real store/API-key setup and on-device
+  purchase testing remain human follow-ups this sandbox cannot do
+  itself — not marking the RevenueCat checklist item as fully done.
+  Snippet: see /SOCIAL_SNIPPETS/2026-09-17.md.
+- 2026-09-20: Run #5 (real Asset pass). No new SOCIAL_FEEDBACK.md entries
+  to incorporate (still empty). Found this run's designated branch again
+  predated the latest progress (same recurring situation as runs #3–#4) —
+  fast-forward-merged run #4's branch (`b33g2a`, PR #3) in first; see
+  "Note on branch/PR history" above. Baseline-verified the merged state
+  (35/35 assertions) before changing anything. Did the Asset pass flagged
+  as the next run's option: built `tools/gen_spore_icons.py`, a
+  hand-authored SVG mushroom-icon generator (cap/stem/spot template,
+  parameterized colors), producing all 10 spore species icons (3 base, 3
+  hybrid, 3 refined, 1 Mystery Spore fallback) as original art, logged in
+  ASSET_LOG.md. Wired them into `main.gd`'s plot buttons (icon + status
+  text stacked via a click-through VBoxContainer, replacing the old
+  text-only buttons). Redesigned the app icon to match
+  (`tools/gen_app_icon.py`) and rendered store-listing deliverables: a
+  real 1024x1024 icon and a real 1179x2556 no-device-frame gameplay
+  screenshot (new `tools/capture_store_screenshot.sh`, which drives the
+  real game-logic functions into a representative mid-game state and
+  captures actual rendered output, same principle as the verification
+  autopilot). Hit a real bug wiring this up: the new icon textures failed
+  to load with "No loader found" the first time verification ran after
+  wiping the sandbox, because Godot's imported-texture binary cache
+  (`.godot/imported/`, gitignored as non-portable) doesn't exist on a
+  fresh checkout and nothing was regenerating it — the gameplay-logic
+  assertions all still passed, which would have silently hidden a real
+  rendering regression from every future run using this asset pattern.
+  Fixed by adding a `--headless --import` pre-step to both
+  `run_headless_verify.sh` and the new `capture_store_screenshot.sh`;
+  verified the fix by wiping `.godot/` and re-running both end to end
+  (35/35 assertions, icons rendering correctly in inspected screenshots).
+  Logged the honest caveat that the new store screenshot's lower
+  two-thirds is still empty background (no environment art yet) rather
+  than overstating the Asset pass as fully "store ready." Given the
+  submission window is down to 10 days as of this run, added an explicit
+  "Timeline risk" section above flagging that RevenueCat/store setup and
+  on-device testing are now the critical path and need human action
+  starting now, not just at the next scheduled run. Snippet: see
+  /SOCIAL_SNIPPETS/2026-09-20.md.
+- 2026-09-24: Run #6 (branch consolidation, Debugging pass, Devpost +
+  demo-video drafts). No new SOCIAL_FEEDBACK.md entries to incorporate
+  (still empty). Started by redoing run #2's gameplay pass from scratch
+  (growth timing, same-type combo, persistence, even independently
+  hitting and fixing the identical `run_headless_verify.sh` path bug run
+  #2 already fixed) before checking for existing open PRs and discovering
+  PR #4 (run #5's branch, `ducsz8`) already contained all of that plus
+  everything through the real Asset pass. Discarded the duplicate work
+  (`git reset --hard` onto `ducsz8`) rather than trying to reconcile two
+  independent implementations of the same features, re-verified the
+  adopted state (35/35 assertions, confirmed from a simulated fresh
+  checkout) before doing anything new — see "Note on branch/PR history
+  (run #6)" above for the full account and the two structural problems
+  (no real base branch; a fresh random branch per scheduled run) behind
+  why this keeps happening. Actual new work this run: (1) reviewed the
+  full Known Issues list and marked the Debugging pass checklist item
+  done — every open item is logged with a resolution path and none is
+  blocking, per the routine's own bar; (2) wrote a complete Devpost
+  submission draft (`/DEVPOST_DRAFT.md`) with every section filled in
+  except the ones that need Emily's own voice or account-gated info; (3)
+  wrote a demo-video shot list (`/DEMO_VIDEO_SHOTLIST.md`) mapping a
+  ~90-second video to real, already-verified gameplay moments with
+  reference screenshots for each beat, plus a note on avoiding
+  third-party music/trademarks. Updated the Timeline risk section: only
+  **6 days** remain (down from 10 four days ago), and this is the third
+  consecutive run to flag that RevenueCat account/key setup, store
+  product setup, on-device testing, and store submission are entirely
+  human-gated with no visible action taken yet — flagging this run that
+  app review time alone could now consume the entire remaining window if
+  that work hasn't already started. Snippet: see
+  /SOCIAL_SNIPPETS/2026-09-24.md (rewritten this run to reflect what
+  actually happened, replacing an earlier draft written before the
+  duplicate-work discovery).

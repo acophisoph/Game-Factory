@@ -3,3 +3,20 @@
 *.translation
 export.cfg
 export_presets.cfg
+
+# `--headless --import` (run before every headless verify, see
+# tools/run_headless_verify.sh) sweeps every resource it finds under the
+# project root, including source SVGs and standalone rasterized PNGs never
+# loaded as Godot resources at runtime (game code only preloads
+# assets/spores/*.png by name — icon.svg/icon.png and the
+# verification_output/ and store_listing/ PNGs are icon-source/evidence
+# artifacts, not resources the game itself loads) and output PNGs in
+# verification_output/ and store_listing/. The .import sidecar files it
+# generates for those are the same kind of local, regenerable cache as
+# .godot/ above — only assets/spores/*.png.import (the actually-loaded
+# spore icon set) is meaningful to commit.
+assets/spores/*.svg.import
+icon.svg.import
+icon.png.import
+verification_output/*.import
+store_listing/*.import

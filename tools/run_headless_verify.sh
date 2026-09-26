@@ -7,14 +7,32 @@
 set -euo pipefail
 
 GODOT_BIN="${GODOT_BIN:-/opt/godot/Godot_v4.3-stable_linux.x86_64}"
-PROJECT_DIR="$1"
+# Resolve to absolute paths: Godot resolves a relative --outdir against the
+# project root (res://), not the caller's cwd, so a relative PROJECT_DIR
+# here silently doubles up into <project>/<project>/verification_output.
+PROJECT_DIR="$(cd "$1" && pwd)"
 OUTDIR="${2:-${PROJECT_DIR}/verification_output}"
+case "${OUTDIR}" in
+	/*) ;;
+	*) OUTDIR="$(pwd)/${OUTDIR}" ;;
+esac
 DISPLAY_NUM=":99"
 
 if [ ! -x "${GODOT_BIN}" ]; then
 	echo "Godot binary not found at ${GODOT_BIN}. Run tools/setup_env.sh first." >&2
 	exit 1
 fi
+
+# .godot/imported/ (the actual imported binary cache resources like PNGs
+# resolve to at runtime) is gitignored as non-portable, so it never exists
+# on a fresh checkout — only the small companion `*.import` files are
+# committed. Without this, any `load()`/`preload()` of a texture asset
+# fails with "No loader found" / "Make sure resources have been imported by
+# opening the project in the editor at least once", even though the
+# gameplay-logic assertions below would still pass, silently hiding a real
+# rendering regression. Re-importing is idempotent and cheap, so it's not
+# gated behind a flag — every verify run does it.
+"${GODOT_BIN}" --headless --path "${PROJECT_DIR}" --import >/dev/null 2>&1 || true
 
 Xvfb "${DISPLAY_NUM}" -screen 0 1280x800x24 &
 XVFB_PID=$!
