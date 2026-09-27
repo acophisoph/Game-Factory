@@ -18,15 +18,45 @@
 - Engine: **Godot 4** (4.3-stable). Using the routine's stated default;
   nothing about this game's mechanics needs a different engine.
 - Repo: this repo, `game/sporewick/` subfolder.
-- Last worked: 2026-09-06 (run #1 — project inception)
-- Days remaining in submission window: **24 days** (from 2026-09-06 to
+- Last worked: 2026-09-27 (run #2 — gameplay pass)
+- Days remaining in submission window: **3 days** (from 2026-09-27 to
   2026-09-30 11:45pm PDT)
+
+## ⚠️ CRITICAL TIMELINE FLAG (read this first, every run until resolved)
+This routine is scheduled for Thursday/Sunday, but the previous run was
+2026-09-06 and this one is 2026-09-27 — **three weeks of runs did not
+happen** (schedule gap, not a project decision). The result: only 3 days
+remain in the Shipaton window, and the checklist below still has 9 of 12
+items untouched, including every item that requires the *human* (Emily),
+not just more agent work:
+- **Store developer accounts.** If an Apple Developer Program account,
+  Google Play Console account, and/or Samsung Galaxy Store seller
+  account are not *already* set up and verified, this cannot ship in
+  time — Apple ID verification and Google Play's mandatory closed
+  testing period for new personal developer accounts (20 testers / 14
+  days) are both human-gated processes an agent cannot shortcut or do
+  on your behalf.
+- **RevenueCat account + API keys** — needed before SDK integration can
+  be tested end to end; agent can wire the SDK calls but needs real
+  keys from your RevenueCat dashboard to verify a sandbox purchase.
+- **Actual submission to the store** — requires your login/credentials;
+  no agent action can publish a listing on your behalf.
+Recommendation given 3 days: pick whichever store you already have a
+verified, review-ready account on (Samsung Galaxy Store has historically
+had the fastest/simplest first-review path with no mandatory testing
+period; this needs re-confirming against current Samsung policy before
+relying on it) and tell the next run which store to target, so remaining
+agent effort goes toward that store's specific requirements instead of
+generic pipeline work. If no store account is ready today, the realistic
+outcome is missing this Shipaton window — flagging now rather than
+after more polish work, per the routine's own point (Section 9): the
+human should see this before more time is spent.
 
 ## Pipeline checklist for current game
 - [x] Idea locked (one-paragraph pitch, genre, core loop) — see above
 - [x] Name checked against known works (see NAME_CHECK.md) — "Sporewick" locked after 3 prior candidates collided
 - [x] Minimal playable vertical slice (core verbs wired end to end) — plant → grow → harvest → combine at Wick → compendium/currency update, all wired and verified headlessly (see Testing note below)
-- [ ] Gameplay pass (feels functional, not just wired) — currently functional but bare; growth timing (3s), plot count (4), and recipe table (3 recipes) are all placeholder-tuned, not balanced
+- [x] Gameplay pass (feels functional, not just wired) — growth timing raised from 3s prototyping placeholder to 45s (real-verify path still uses 3s via a separate constant so headless autopilot stays fast); resolved the same-type-combo open question as a deliberate "Twin Bloom" result instead of silent "Mystery Spore" fallback. Plot count (4) and 3-recipe table are still not balance-tuned — acceptable per "good enough for now," flagged below, not a blocker given the timeline.
 - [ ] Design pass (UI/UX coherent) — current UI is default-theme Buttons/Labels only, no visual identity yet
 - [ ] Asset pass (see ASSET_LOG.md — every asset verified) — no real art/audio yet; only a placeholder icon and primitive-colored UI, both original
 - [ ] Testing pass (headless verification, save/load, perf) — headless verification tool built and passing (see below); save/load and perf not yet addressed (nothing persists between runs yet)
@@ -62,28 +92,34 @@
   to `game/sporewick/verification_output/*.png` (committed as evidence).
 
 ## Known issues (debugging log — triaged, non-blocking for now)
-- Combining two harvested spores of the *same* base type isn't in the
-  recipe table, so it silently falls back to a generic "Mystery Spore"
-  result. This might be fine as an intentional design choice (rewards
-  harvesting *different* spore types together), but it hasn't been
-  decided on purpose yet — flagging for the Gameplay pass rather than
-  fixing blind.
-- Growth timer (3 seconds) is a prototyping-speed placeholder, not a
-  real idle-game timescale. Needs a real balance pass (likely minutes-to-
-  hours with offline-progress catch-up) before this reads as an "idle
-  game" rather than a fast arcade loop.
+- ~~Same-base-type combine had no defined behavior~~ — **resolved this
+  run**: now a deliberate "Twin Bloom: <type>" result (see main.gd).
+- Growth timer raised from 3s to 45s this run — still tuned for a fast,
+  demoable pace rather than a deep idle-game timescale (minutes-to-hours
+  with offline-progress catch-up), which is the "real" version of this
+  system. Given the 3-day timeline (see CRITICAL TIMELINE FLAG above),
+  45s is being treated as "good enough for now" — it's also short enough
+  to show real plant→grow→harvest loops on camera for the demo video
+  without heavy edits.
 - No persistence yet (nothing saved between sessions) — needed before
-  the Testing pass can be considered complete.
-- No RevenueCat integration yet — needed before Testing pass.
+  the Testing pass can be considered complete. Given the timeline, this
+  is now higher-priority than further balance work since a persisted
+  save is closer to store-readiness than gameplay polish is.
+- No RevenueCat integration yet — needs real API keys from the human's
+  RevenueCat dashboard (see CRITICAL TIMELINE FLAG); agent can wire the
+  SDK call shapes without them but can't verify a real sandbox purchase.
 
 ## Pipeline checklist progress note
-Per the routine's own "cap each piece at 4 rounds" rule: this run spent
-its budget on inception (idea, name-check, engine verification, headless
-tooling, vertical slice) rather than polish, which is the correct order
-per Section 2 ("build ONE minimal playable vertical slice first"). Next
-run should do a Gameplay pass: tune growth timing, expand the recipe
-table, and decide the same-type-combo question above — not jump ahead to
-art or RevenueCat yet.
+Run #1 spent its budget on inception per Section 2. This run (#2) did the
+planned Gameplay pass (growth timing, same-type-combo decision) and fixed
+a real bug found along the way in the shared headless-verify tool (see
+changelog). Given only 3 days remain, the next run's priority should NOT
+be further gameplay/design polish — it should be, in order: (1) get an
+answer from the human on which store to target (see CRITICAL TIMELINE
+FLAG), (2) minimal persistence (save/load) since Testing needs it, (3)
+RevenueCat SDK wiring using whatever keys are available, (4) store
+listing assets (icon/screenshot) since those are pure agent-doable work
+that doesn't block on anything.
 
 ## Backlog (next games, if current one finishes or gets shelved)
 1. (none yet — this is the first game; backlog will fill in as ideas come up or if Sporewick gets shelved per the 3-stalled-runs rule)
@@ -108,3 +144,26 @@ art or RevenueCat yet.
   harvest → combine → compendium), all 9 autopilot assertions passing
   with real rendered screenshots as evidence. Not shipped snippet Y/N:
   first-ever snippet, see /SOCIAL_SNIPPETS/2026-09-06.md.
+- 2026-09-27: Run #2 (gameplay pass). **Flagging a schedule gap**: this
+  routine is meant to run Thu/Sun, but the prior run was 2026-09-06 — 21
+  days and roughly 6 missed firings, not a deliberate pause. That leaves
+  only 3 days to the Sep 30 11:45pm PDT deadline with 9 of 12 checklist
+  items untouched. Added a top-of-file CRITICAL TIMELINE FLAG for the
+  human and for future runs. Did the planned gameplay pass anyway: raised
+  the growth timer from a 3s prototyping placeholder to 45s (kept 3s for
+  the `--verify` autopilot path via a new `VERIFY_GROW_SECONDS` constant
+  so headless checks stay fast), and resolved the open same-type-combine
+  question as a deliberate "Twin Bloom: <type>" result instead of an
+  undecided silent fallback. While re-running the headless verifier to
+  confirm the change, found and fixed a real bug in the shared
+  `tools/run_headless_verify.sh`: passing a relative project dir caused
+  Godot's internal chdir-on `--path` to double the default screenshot
+  output path (`game/sporewick/game/sporewick/verification_output/...`
+  instead of `game/sporewick/verification_output/...`) — fixed by
+  resolving `PROJECT_DIR` to an absolute path up front. This affects
+  every future game that uses this tool, not just Sporewick. Re-ran
+  verification after the fix: all 9 autopilot assertions pass with fresh
+  real rendered screenshots (one of which happened to exercise the new
+  Twin Bloom path, since the autopilot's random spore picks landed on
+  the same type both times). Not shipped snippet Y/N: no, see
+  /SOCIAL_SNIPPETS/2026-09-27.md.
