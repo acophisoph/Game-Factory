@@ -7,7 +7,7 @@
 set -euo pipefail
 
 GODOT_BIN="${GODOT_BIN:-/opt/godot/Godot_v4.3-stable_linux.x86_64}"
-PROJECT_DIR="$1"
+PROJECT_DIR="$(cd "$1" && pwd)"
 OUTDIR="${2:-${PROJECT_DIR}/verification_output}"
 DISPLAY_NUM=":99"
 

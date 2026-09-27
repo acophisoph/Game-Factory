@@ -3,7 +3,8 @@ extends Node2D
 # Sporewick core loop: plant -> grow -> harvest -> combine at the Wick ->
 # discover a hybrid species in the compendium.
 
-const GROW_SECONDS := 3.0
+const GROW_SECONDS := 45.0
+const VERIFY_GROW_SECONDS := 3.0
 const PLOT_COUNT := 4
 
 const BASE_SPORES := ["Ember Cap", "Moss Puff", "Glimmer Truffle"]
@@ -13,6 +14,13 @@ const RECIPES := {
 	"Ember Cap|Glimmer Truffle": "Suncap Ember",
 	"Glimmer Truffle|Moss Puff": "Duskmoss Lantern",
 }
+
+# Combining two spores of the same base type is a deliberate "Twin Bloom"
+# path rather than a fallback: it rewards players who couldn't diversify
+# yet with a small guaranteed result, while cross-type combos stay the
+# valuable/rare path via RECIPES. Decided during the 2026-09-27 gameplay
+# pass (previously an undecided silent fallback to "Mystery Spore").
+const TWIN_BLOOM_PREFIX := "Twin Bloom: "
 
 enum PlotState { EMPTY, GROWING, READY }
 
@@ -29,6 +37,7 @@ var _status_label: Label
 var _wick_button: Button
 
 var autopilot_ok := true
+var _grow_seconds := GROW_SECONDS
 
 
 func _ready() -> void:
@@ -41,6 +50,7 @@ func _ready() -> void:
 
 	var args := OS.get_cmdline_user_args()
 	if args.has("--verify"):
+		_grow_seconds = VERIFY_GROW_SECONDS
 		var outdir := "res://verification_output"
 		for a in args:
 			if a.begins_with("--outdir="):
@@ -54,7 +64,7 @@ func _process(delta: float) -> void:
 	for plot in plots:
 		if plot.state == PlotState.GROWING:
 			plot.timer += delta
-			if plot.timer >= GROW_SECONDS:
+			if plot.timer >= _grow_seconds:
 				plot.state = PlotState.READY
 				changed = true
 	if changed:
@@ -88,10 +98,14 @@ func combine_at_wick() -> bool:
 		return false
 	var a: String = inventory.pop_front()
 	var b: String = inventory.pop_front()
-	var pair: Array[String] = [a, b]
-	pair.sort()
-	var key: String = pair[0] + "|" + pair[1]
-	var result: String = RECIPES.get(key, "Mystery Spore")
+	var result: String
+	if a == b:
+		result = TWIN_BLOOM_PREFIX + a
+	else:
+		var pair: Array[String] = [a, b]
+		pair.sort()
+		var key: String = pair[0] + "|" + pair[1]
+		result = RECIPES.get(key, "Mystery Spore")
 	var is_new := not compendium.has(result)
 	compendium[result] = compendium.get(result, 0) + 1
 	currency += 10 if is_new else 3
@@ -186,7 +200,7 @@ func _refresh_ui() -> void:
 				btn.text = "Empty plot\n(tap to plant)"
 				btn.modulate = Color(0.55, 0.55, 0.55)
 			PlotState.GROWING:
-				var pct := int(100.0 * plot.timer / GROW_SECONDS)
+				var pct := int(100.0 * plot.timer / _grow_seconds)
 				btn.text = "%s\ngrowing %d%%" % [plot.spore_type, pct]
 				btn.modulate = Color(0.6, 0.75, 0.5)
 			PlotState.READY:
@@ -223,7 +237,7 @@ func _run_autopilot(outdir: String) -> void:
 	_assert(plant_at(1), "plant plot 1")
 	await _screenshot(outdir, "01_planted")
 
-	await get_tree().create_timer(GROW_SECONDS + 0.5).timeout
+	await get_tree().create_timer(_grow_seconds + 0.5).timeout
 	_assert(plots[0].state == PlotState.READY, "plot 0 grew to ready")
 	_assert(plots[1].state == PlotState.READY, "plot 1 grew to ready")
 	await _screenshot(outdir, "02_grown")
