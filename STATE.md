@@ -18,9 +18,9 @@
 - Engine: **Godot 4** (4.3-stable). Using the routine's stated default;
   nothing about this game's mechanics needs a different engine.
 - Repo: this repo, `game/sporewick/` subfolder.
-- Last worked: 2026-09-06 (run #1 — project inception)
-- Days remaining in submission window: **24 days** (from 2026-09-06 to
-  2026-09-30 11:45pm PDT)
+- Last worked: 2026-10-01 (run #2 — deadline check only; last code work 2026-09-06)
+- Days remaining in submission window: **0 — window CLOSED** (ended 2026-09-30
+  11:45pm PDT; as of 2026-10-01 Sporewick is not published, no Devpost entry)
 
 ## Pipeline checklist for current game
 - [x] Idea locked (one-paragraph pitch, genre, core loop) — see above
@@ -108,3 +108,4 @@ art or RevenueCat yet.
   harvest → combine → compendium), all 9 autopilot assertions passing
   with real rendered screenshots as evidence. Not shipped snippet Y/N:
   first-ever snippet, see /SOCIAL_SNIPPETS/2026-09-06.md.
+- 2026-10-01: Run #2. Shipaton submission window closed 2026-09-30 11:45pm PDT. Sporewick never got past the vertical slice (no gameplay/design/asset passes, no RevenueCat, no store listing), so it cannot qualify. Did NOT start new game work; flagged to human to decide whether to continue Sporewick as a standalone project, shelve it, or retire this routine. No other runs appear on this branch between 09-06 and 10-01. — snippet Y (SOCIAL_SNIPPETS/2026-10-01.md)
