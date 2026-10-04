@@ -19,8 +19,7 @@
   nothing about this game's mechanics needs a different engine.
 - Repo: this repo, `game/sporewick/` subfolder.
 - Last worked: 2026-09-06 (run #1 — project inception)
-- Days remaining in submission window: **24 days** (from 2026-09-06 to
-  2026-09-30 11:45pm PDT)
+- Days remaining in submission window: **0 — window CLOSED** (ended 2026-09-30 11:45pm PDT; checked 2026-10-04)
 
 ## Pipeline checklist for current game
 - [x] Idea locked (one-paragraph pitch, genre, core loop) — see above
@@ -108,3 +107,10 @@ art or RevenueCat yet.
   harvest → combine → compendium), all 9 autopilot assertions passing
   with real rendered screenshots as evidence. Not shipped snippet Y/N:
   first-ever snippet, see /SOCIAL_SNIPPETS/2026-09-06.md.
+- 2026-10-04: Run #2 (first run since inception; only 1 prior run occurred
+  despite twice-weekly cadence). Shipaton submission window closed
+  2026-09-30 with Sporewick still at vertical-slice stage (no RevenueCat,
+  no store listing, no Devpost draft). No game work done: nothing built
+  now can qualify for the contest. Awaiting human decision on whether to
+  continue Sporewick as a non-contest project, shelve it, or retarget.
+  No feedback entries in SOCIAL_FEEDBACK.md. Snippet Y/N: N (nothing built).
